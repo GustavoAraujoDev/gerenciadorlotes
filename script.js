@@ -109,15 +109,15 @@
         get(loteRef).then((snapshot) => {
             const lote = snapshot.val();
             parcelas = lote.parcelas; // Atualizar o número total de parcelas
-            detalhes.textContent = `
-                Nome do Lote: ${lote.nomeLote}<br>
-                Comprador: ${lote.comprador}<br>
-                Tamanho: ${lote.tamanho} m²<br>
-                Valor Total: R$ ${lote.valor}<br>
-                Parcelas: ${lote.parcelas}<br>
-                Parcelas Pagas: ${lote.parcelasPagas}<br>
-                Parcelas Faltantes: ${lote.parcelasFaltantes}<br>
-            `;
+            detalhes.innerHTML = `
+            <p>Nome do Lote: ${lote.nomeLote}</p>
+            <p>Comprador: ${lote.comprador}</p>
+            <p>Tamanho: ${lote.tamanho} m²</p>
+            <p>Valor Total: R$ ${lote.valor}</p>
+            <p>Parcelas: ${lote.parcelas}</p>
+            <p>Parcelas Pagas: ${lote.parcelasPagas}</p>
+            <p>Parcelas Faltantes: ${lote.parcelasFaltantes}</p>
+        `;
             detalhesLote.style.display = 'block';
         });
     }
