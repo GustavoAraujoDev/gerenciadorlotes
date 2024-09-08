@@ -12,6 +12,7 @@
     appId: "1:248668218799:web:123be74080d9918cf1bb5a"
   };
 
+
       // Inicializa o Firebase
       const app = initializeApp(firebaseConfig);
       const database = getDatabase(app);
@@ -37,7 +38,7 @@
   
         let loteAtualIndex = null; // Para rastrear o lote selecionado
         let parcelas = 0; // Para armazenar o número total de parcelas do lote atual
-  
+        carregarLotes();
         let loteKeyExcluir = null; // Armazena o key do lote a ser excluído
   
         // Mostrar/ocultar o formulário de adicionar lote
@@ -192,3 +193,4 @@
         // Inicializar a carga de lotes
         carregarLotes();
       });
+      
