@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Lotes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" href="WhatsApp Image 2024-09-08 at 11.04.27.jpeg" type="image/x-icon">
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciamento de Lotes</h1>
+        <!-- Adicione seus elementos HTML para formulário e lista aqui -->
+
+        <!-- Formulário de Lote -->
+        <div id="formContainerLote" style="display:none;">
+            <form id="formLote">
+                <input type="text" id="nomeLote" placeholder="Nome do Lote" required>
+                <input type="text" id="comprador" placeholder="Comprador" required>
+                <input type="number" id="tamanho" placeholder="Tamanho (m²)" required>
+                <input type="number" id="valor" placeholder="Valor Total" required>
+                <input type="number" id="parcelas" placeholder="Total de Parcelas" required>
+                <input type="number" id="parcelasPagas" placeholder="Parcelas Pagas" required>
+                <button type="submit">Adicionar Lote</button>
+            </form>
+        </div>
+        <button id="btnMostrarFormularioLote">Mostrar Formulário</button>
+        <ul id="listaLotes"></ul>
+
+        <!-- Detalhes do Lote -->
+        <div id="detalhesLote" style="display:none;">
+            <p id="detalhes"></p>
+            <input type="number" id="atualizarParcelas" placeholder="Parcelas Pagas">
+            <button id="btnAtualizarParcelas">Atualizar Parcelas</button>
+            <button id="btnOcultarDetalhes">Ocultar Detalhes</button>
+        </div>
+
+        <!-- Modal de Confirmação -->
+        <div id="modalConfirmacao" style="display:none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <p>Tem certeza de que deseja atualizar as parcelas?</p>
+                <button id="btnConfirmarAtualizacao">Sim</button>
+                <button id="btnCancelarAtualizacao">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inclua os scripts do Firebase com CDN e o seu script JS -->
+   
+    <script src="script.js" type="module"></script>
+</body>
+</html>

@@ -3,68 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        window.onload = function() {
-            // Verifica se a URL já está em login.html
-            if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
-                window.location.href = 'login.html';
-            }
-        };
-    </script>
-    <script>
-        window.onload = function() {
-            // Verifica se a URL já está em login.html
-            if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
-                window.location.href = 'index.html';
-            }
-        };
-    </script>
-    
-    <title>Gerenciamento de Lotes</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Login</title>
+    <link rel="stylesheet" href="styleslogin.css">
     <link rel="shortcut icon" href="WhatsApp Image 2024-09-08 at 11.04.27.jpeg" type="image/x-icon">
 </head>
 <body>
-    <div class="container">
-        <h1>Gerenciamento de Lotes</h1>
-        <!-- Adicione seus elementos HTML para formulário e lista aqui -->
-
-        <!-- Formulário de Lote -->
-        <div id="formContainerLote" style="display:none;">
-            <form id="formLote">
-                <input type="text" id="nomeLote" placeholder="Nome do Lote" required>
-                <input type="text" id="comprador" placeholder="Comprador" required>
-                <input type="number" id="tamanho" placeholder="Tamanho (m²)" required>
-                <input type="number" id="valor" placeholder="Valor Total" required>
-                <input type="number" id="parcelas" placeholder="Total de Parcelas" required>
-                <input type="number" id="parcelasPagas" placeholder="Parcelas Pagas" required>
-                <button type="submit">Adicionar Lote</button>
-            </form>
-        </div>
-        <button id="btnMostrarFormularioLote">Mostrar Formulário</button>
-        <ul id="listaLotes"></ul>
-
-        <!-- Detalhes do Lote -->
-        <div id="detalhesLote" style="display:none;">
-            <p id="detalhes"></p>
-            <input type="number" id="atualizarParcelas" placeholder="Parcelas Pagas">
-            <button id="btnAtualizarParcelas">Atualizar Parcelas</button>
-            <button id="btnOcultarDetalhes">Ocultar Detalhes</button>
-        </div>
-
-        <!-- Modal de Confirmação -->
-        <div id="modalConfirmacao" style="display:none;">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <p>Tem certeza de que deseja atualizar as parcelas?</p>
-                <button id="btnConfirmarAtualizacao">Sim</button>
-                <button id="btnCancelarAtualizacao">Cancelar</button>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
             </div>
-        </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="error-message" class="error-message"></div>
     </div>
 
-    <!-- Inclua os scripts do Firebase com CDN e o seu script JS -->
-   
-    <script src="script.js" type="module"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2d46W-IGXfP6k8RWHb9hqZPJWLTRjRsU",
+            authDomain: "gerenciadorlotes.firebaseapp.com",
+            projectId: "gerenciadorlotes",
+            storageBucket: "gerenciadorlotes.appspot.com",
+            messagingSenderId: "248668218799",
+            appId: "1:248668218799:web:123be74080d9918cf1bb5a"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // Redirecionar para a página principal ou dashboard
+                window.location.href = 'home.html';
+            } catch (error) {
+                // Mostrar mensagem de erro
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.textContent = error.message;
+            }
+        });
+    </script>
 </body>
 </html>
