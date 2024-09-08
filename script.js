@@ -12,52 +12,58 @@
     appId: "1:248668218799:web:123be74080d9918cf1bb5a"
   };
 
-  // Inicializa o Firebase
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const formLote = document.getElementById('formLote');
-    const formContainerLote = document.getElementById('formContainerLote');
-    const btnMostrarFormularioLote = document.getElementById('btnMostrarFormularioLote');
-    const listaLotes = document.getElementById('listaLotes');
-    const detalhesLote = document.getElementById('detalhesLote');
-    const detalhes = document.getElementById('detalhes');
-    const atualizarParcelasInput = document.getElementById('atualizarParcelas');
-    const btnAtualizarParcelas = document.getElementById('btnAtualizarParcelas');
-    const btnOcultarDetalhes = document.getElementById('btnOcultarDetalhes');
-    const modalConfirmacao = document.getElementById('modalConfirmacao');
-    const btnConfirmarAtualizacao = document.getElementById('btnConfirmarAtualizacao');
-    const btnCancelarAtualizacao = document.getElementById('btnCancelarAtualizacao');
-    const closeModal = document.querySelector('.close');
-
-    let loteAtualIndex = null; // Para rastrear o lote selecionado
-    let parcelas = 0; // Para armazenar o número total de parcelas do lote atual
-
-    // Mostrar/ocultar o formulário de adicionar lote
-    btnMostrarFormularioLote.addEventListener('click', () => {
-        formContainerLote.style.display = formContainerLote.style.display === 'none' ? 'block' : 'none';
-    });
-
-    // Adicionar um novo lote
-    formLote.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const nomeLote = document.getElementById('nomeLote').value;
-        const comprador = document.getElementById('comprador').value;
-        const tamanho = document.getElementById('tamanho').value;
-        const valor = document.getElementById('valor').value;
-        const parcelas = parseInt(document.getElementById('parcelas').value, 10);
-        const parcelasPagas = parseInt(document.getElementById('parcelasPagas').value, 10);
-
-        if (isNaN(parcelas) || isNaN(parcelasPagas)) {
+      // Inicializa o Firebase
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+  
+      document.addEventListener('DOMContentLoaded', () => {
+        const formLote = document.getElementById('formLote');
+        const formContainerLote = document.getElementById('formContainerLote');
+        const btnMostrarFormularioLote = document.getElementById('btnMostrarFormularioLote');
+        const listaLotes = document.getElementById('listaLotes');
+        const detalhesLote = document.getElementById('detalhesLote');
+        const detalhes = document.getElementById('detalhes');
+        const atualizarParcelasInput = document.getElementById('atualizarParcelas');
+        const btnAtualizarParcelas = document.getElementById('btnAtualizarParcelas');
+        const btnOcultarDetalhes = document.getElementById('btnOcultarDetalhes');
+        const modalConfirmacao = document.getElementById('modalConfirmacao');
+        const btnConfirmarAtualizacao = document.getElementById('btnConfirmarAtualizacao');
+        const btnCancelarAtualizacao = document.getElementById('btnCancelarAtualizacao');
+        const closeModal = document.querySelector('.close');
+        const modalConfirmacaoExclusao = document.getElementById('modalConfirmacaoExclusao');
+        const btnConfirmarExclusao = document.getElementById('btnConfirmarExclusao');
+        const btnCancelarExclusao = document.getElementById('btnCancelarExclusao');
+        const closeExcluir = document.querySelector('.closeExcluir');
+  
+        let loteAtualIndex = null; // Para rastrear o lote selecionado
+        let parcelas = 0; // Para armazenar o número total de parcelas do lote atual
+  
+        let loteKeyExcluir = null; // Armazena o key do lote a ser excluído
+  
+        // Mostrar/ocultar o formulário de adicionar lote
+        btnMostrarFormularioLote.addEventListener('click', () => {
+            formContainerLote.style.display = formContainerLote.style.display === 'none' ? 'block' : 'none';
+        });
+  
+        // Adicionar um novo lote
+        formLote.addEventListener('submit', async (e) => {
+          e.preventDefault();
+  
+          const nomeLote = document.getElementById('nomeLote').value;
+          const comprador = document.getElementById('comprador').value;
+          const tamanho = document.getElementById('tamanho').value;
+          const valor = document.getElementById('valor').value;
+          const parcelas = parseInt(document.getElementById('parcelas').value, 10);
+          const parcelasPagas = parseInt(document.getElementById('parcelasPagas').value, 10);
+  
+          if (isNaN(parcelas) || isNaN(parcelasPagas)) {
             alert('Por favor, insira valores válidos para parcelas e parcelas pagas.');
             return;
-        }
-
-        const parcelasFaltantes = parcelas - parcelasPagas;
-
-        const lote = {
+          }
+  
+          const parcelasFaltantes = parcelas - parcelasPagas;
+  
+          const lote = {
             nomeLote,
             comprador,
             tamanho,
@@ -65,112 +71,124 @@
             parcelas,
             parcelasPagas,
             parcelasFaltantes
-        };
-
-        const newLoteRef = ref(database, 'lotes/' + Date.now());
-        await set(newLoteRef, lote);
-
-        formLote.reset();
-        formContainerLote.style.display = 'none'; // Esconder o formulário após adicionar
-        carregarLotes(); // Atualizar a lista de lotes
-    });
-
-    // Carregar lotes do Firebase
-    function carregarLotes() {
-        const lotesRef = ref(database, 'lotes/');
-        onValue(lotesRef, (snapshot) => {
+          };
+  
+          const newLoteRef = ref(database, 'lotes/' + Date.now());
+          await set(newLoteRef, lote);
+  
+          formLote.reset();
+          formContainerLote.style.display = 'none'; // Esconder o formulário após adicionar
+          carregarLotes(); // Atualizar a lista de lotes
+        });
+  
+        // Carregar lotes do Firebase
+        function carregarLotes() {
+          const lotesRef = ref(database, 'lotes/');
+          onValue(lotesRef, (snapshot) => {
             listaLotes.innerHTML = '';
             snapshot.forEach((childSnapshot) => {
-                const lote = childSnapshot.val();
-                const li = document.createElement('li');
-                li.textContent = lote.nomeLote;
-
-                // Botão de exclusão
-                const btnExcluir = document.createElement('button');
-                btnExcluir.textContent = 'Excluir';
-                btnExcluir.className = 'btn-excluir';
-                btnExcluir.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Impede a propagação do evento de clique para a lista
-                    excluirLote(childSnapshot.key);
-                });
-
-                li.appendChild(btnExcluir);
-                li.addEventListener('click', () => exibirDetalhesLote(childSnapshot.key));
-                listaLotes.appendChild(li);
+              const lote = childSnapshot.val();
+              const li = document.createElement('li');
+              li.textContent = lote.nomeLote;
+  
+              // Botão de exclusão
+              const btnExcluir = document.createElement('button');
+              btnExcluir.textContent = 'Excluir';
+              btnExcluir.className = 'btn-excluir';
+              btnExcluir.addEventListener('click', (e) => {
+                e.stopPropagation(); // Impede a propagação do evento de clique para a lista
+                loteKeyExcluir = childSnapshot.key; // Armazena o key do lote a ser excluído
+                modalConfirmacaoExclusao.style.display = 'block'; // Exibe o modal de confirmação
+              });
+             
+              li.appendChild(btnExcluir);
+              li.addEventListener('click', () => exibirDetalhesLote(childSnapshot.key));
+              listaLotes.appendChild(li);
             });
-        });
-    }
-
-    // Exibir detalhes do lote
-    function exibirDetalhesLote(key) {
-        loteAtualIndex = key; // Armazenar qual lote está sendo visualizado
-
-        const loteRef = ref(database, 'lotes/' + key);
-        get(loteRef).then((snapshot) => {
+          });
+        }
+  
+        // Exibir detalhes do lote
+        function exibirDetalhesLote(key) {
+          loteAtualIndex = key; // Armazenar qual lote está sendo visualizado
+  
+          const loteRef = ref(database, 'lotes/' + key);
+          get(loteRef).then((snapshot) => {
             const lote = snapshot.val();
             parcelas = lote.parcelas; // Atualizar o número total de parcelas
             detalhes.innerHTML = `
-            <p>Nome do Lote: ${lote.nomeLote}</p>
-            <p>Comprador: ${lote.comprador}</p>
-            <p>Tamanho: ${lote.tamanho} m²</p>
-            <p>Valor Total: R$ ${lote.valor}</p>
-            <p>Parcelas: ${lote.parcelas}</p>
-            <p>Parcelas Pagas: ${lote.parcelasPagas}</p>
-            <p>Parcelas Faltantes: ${lote.parcelasFaltantes}</p>
-        `;
+              <p>Nome do Lote: ${lote.nomeLote}</p>
+              <p>Comprador: ${lote.comprador}</p>
+              <p>Tamanho: ${lote.tamanho} m²</p>
+              <p>Valor Total: R$ ${lote.valor}</p>
+              <p>Parcelas: ${lote.parcelas}</p>
+              <p>Parcelas Pagas: ${lote.parcelasPagas}</p>
+              <p>Parcelas Faltantes: ${lote.parcelasFaltantes}</p>
+            `;
             detalhesLote.style.display = 'block';
+          });
+        }
+  
+        // Ocultar detalhes do lote
+        btnOcultarDetalhes.addEventListener('click', () => {
+          detalhesLote.style.display = 'none';
         });
-    }
-
-    // Ocultar detalhes do lote
-    btnOcultarDetalhes.addEventListener('click', () => {
-        detalhesLote.style.display = 'none';
-    });
-
-    // Atualizar parcelas pagas
-    btnAtualizarParcelas.addEventListener('click', () => {
-        modalConfirmacao.style.display = 'block';
-    });
-
-    // Confirmar atualização
-    btnConfirmarAtualizacao.addEventListener('click', async () => {
-        const parcelasPagas = parseInt(atualizarParcelasInput.value, 10);
-
-        if (isNaN(parcelasPagas)) {
+  
+        // Atualizar parcelas pagas
+        btnAtualizarParcelas.addEventListener('click', () => {
+          modalConfirmacao.style.display = 'block';
+        });
+  
+        // Confirmar atualização
+        btnConfirmarAtualizacao.addEventListener('click', async () => {
+          const parcelasPagas = parseInt(atualizarParcelasInput.value, 10);
+  
+          if (isNaN(parcelasPagas)) {
             alert('Por favor, insira um número válido para parcelas pagas.');
             return;
-        }
-
-        const parcelasFaltantes = parcelas - parcelasPagas;
-
-        const loteRef = ref(database, 'lotes/' + loteAtualIndex);
-        await update(loteRef, {
+          }
+  
+          const parcelasFaltantes = parcelas - parcelasPagas;
+  
+          const loteRef = ref(database, 'lotes/' + loteAtualIndex);
+          await update(loteRef, {
             parcelasPagas: parcelasPagas,
             parcelasFaltantes: parcelasFaltantes
+          });
+  
+          modalConfirmacao.style.display = 'none';
+          detalhesLote.style.display = 'none';
+          carregarLotes(); // Atualizar a lista de lotes
         });
-
-        modalConfirmacao.style.display = 'none';
-        detalhesLote.style.display = 'none';
-        carregarLotes(); // Atualizar a lista de lotes
-    });
-
-    // Cancelar atualização
-    btnCancelarAtualizacao.addEventListener('click', () => {
-        modalConfirmacao.style.display = 'none';
-    });
-
-    // Fechar o modal ao clicar no 'x'
-    closeModal.addEventListener('click', () => {
-        modalConfirmacao.style.display = 'none';
-    });
-
-    // Excluir um lote
-    async function excluirLote(key) {
-        const loteRef = ref(database, 'lotes/' + key);
-        await remove(loteRef);
-        carregarLotes(); // Atualizar a lista de lotes
-    }
-
-    // Inicializar a carga de lotes
-    carregarLotes();
-});
+  
+        // Cancelar atualização
+        btnCancelarAtualizacao.addEventListener('click', () => {
+          modalConfirmacao.style.display = 'none';
+        });
+  
+        // Fechar o modal ao clicar no 'x'
+        closeModal.addEventListener('click', () => {
+          modalConfirmacao.style.display = 'none';
+        });
+  
+        // Confirmar exclusão do lote
+        btnConfirmarExclusao.addEventListener('click', async () => {
+          const loteRef = ref(database, 'lotes/' + loteKeyExcluir);
+          await remove(loteRef);
+          modalConfirmacaoExclusao.style.display = 'none'; // Fechar o modal de exclusão
+          carregarLotes(); // Atualizar a lista de lotes
+        });
+  
+        // Cancelar exclusão
+        btnCancelarExclusao.addEventListener('click', () => {
+          modalConfirmacaoExclusao.style.display = 'none';
+        });
+  
+        // Fechar o modal de exclusão ao clicar no 'x'
+        closeExcluir.addEventListener('click', () => {
+          modalConfirmacaoExclusao.style.display = 'none';
+        });
+  
+        // Inicializar a carga de lotes
+        carregarLotes();
+      });
