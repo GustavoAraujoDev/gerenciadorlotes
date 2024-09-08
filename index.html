@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        window.onload = function() {
+            // Verifica se a URL já está em login.html
+            if (window.location.pathname === '/index.html' || window.location.pathname === '/') {
+                window.location.href = 'login.html';
+            }
+        };
+    </script>
     <title>Gerenciamento de Lotes</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="shortcut icon" href="WhatsApp Image 2024-09-08 at 11.04.27.jpeg" type="image/x-icon">
