@@ -110,13 +110,13 @@
             const lote = snapshot.val();
             parcelas = lote.parcelas; // Atualizar o número total de parcelas
             detalhes.textContent = `
-                Nome do Lote: ${lote.nomeLote}
-                Comprador: ${lote.comprador}
-                Tamanho: ${lote.tamanho} m²
-                Valor Total: R$ ${lote.valor}
-                Parcelas: ${lote.parcelas}
-                Parcelas Pagas: ${lote.parcelasPagas}
-                Parcelas Faltantes: ${lote.parcelasFaltantes}
+                Nome do Lote: ${lote.nomeLote}<br>
+                Comprador: ${lote.comprador}<br>
+                Tamanho: ${lote.tamanho} m²<br>
+                Valor Total: R$ ${lote.valor}<br>
+                Parcelas: ${lote.parcelas}<br>
+                Parcelas Pagas: ${lote.parcelasPagas}<br>
+                Parcelas Faltantes: ${lote.parcelasFaltantes}<br>
             `;
             detalhesLote.style.display = 'block';
         });
