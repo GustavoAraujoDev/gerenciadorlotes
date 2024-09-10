@@ -3,63 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Lotes</title>
+    <title>Gerenciamento de Terrenos</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="shortcut icon" href="WhatsApp Image 2024-09-08 at 11.04.27.jpeg" type="image/x-icon">
 </head>
 <body>
     <div class="container">
-        <button id="logout" onclick="window.location.href = 'index.html';">Sair</button>
-        <h1>Gerenciamento de Lotes</h1>
-        <!-- Adicione seus elementos HTML para formulário e lista aqui -->
-
-        <!-- Formulário de Lote -->
-        <div id="formContainerLote" style="display:none;">
-            <form id="formLote">
-                <input type="text" id="nomeLote" placeholder="Nome do Lote" required>
-                <input type="text" id="comprador" placeholder="Comprador" required>
-                <input type="number" id="tamanho" placeholder="Tamanho (m²)" required>
-                <input type="number" id="valor" placeholder="Valor Total" required>
-                <input type="number" id="parcelas" placeholder="Total de Parcelas" required>
-                <input type="number" id="parcelasPagas" placeholder="Parcelas Pagas" required>
-                <button type="submit">Adicionar Lote</button>
-            </form>
+        <h1>Gerenciamento de Vendas de Terreno</h1>
+        <p>Estrada</p>
+        <div class="terreno">
+            <!-- Lotes -->
+            <div class="lote" data-lote="1">Lote 1</div>
+            <div class="lote" data-lote="2">Lote 2</div>
+            <div class="lote" data-lote="3">Lote 3</div>
+            <div class="lote" data-lote="4">Lote 4</div>
+            <div class="lote" data-lote="5">Lote 5</div>
+            <div class="lote" data-lote="6">Lote 6</div>
+            <div class="lote" data-lote="7">Lote 7</div>
+            <!-- Adicione mais lotes conforme necessário -->
         </div>
-        <button id="btnMostrarFormularioLote">Mostrar Formulário</button>
-        <ul id="listaLotes"></ul>
+        <h4 style="color: #00a000;">Lote Verde - Ocupado</h4>
+        <h4 style="color: #ffff;">Lote Branco - Livre</h4>
+        <h3 id="feedback-message" class="hidden"></h3> <!-- Mensagem de feedback -->
 
-        <!-- Detalhes do Lote -->
-        <div id="detalhesLote" style="display:none;">
-            <p id="detalhes"></p>
-            <input type="number" id="atualizarParcelas" placeholder="Parcelas Pagas">
-            <button id="btnAtualizarParcelas">Atualizar Parcelas</button>
-            <button id="btnOcultarDetalhes">Ocultar Detalhes</button>
-        </div>
-
-        <!-- Modal de Confirmação -->
-        <div id="modalConfirmacao" style="display:none;">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <p>Tem certeza de que deseja atualizar as parcelas?</p>
-                <button id="btnConfirmarAtualizacao">Sim</button>
-                <button id="btnCancelarAtualizacao">Cancelar</button>
-            </div>
-        </div>
     </div>
 
-     <!-- Modal de Confirmação para Exclusão -->
-     <div id="modalConfirmacaoExclusao" style="display:none;">
+    <!-- Modal para detalhes do lote -->
+    <div id="modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p>Tem certeza de que deseja excluir este lote?</p>
-            <button id="btnConfirmarExclusao">Sim</button>
-            <button id="btnCancelarExclusao">Cancelar</button>
+            <h2>Detalhes do Lote <span id="lote-id"></span></h2>
+            <div id="availability-message"></div>
+
+            <form id="lote-form" class="hidden">
+                <label for="comprador">Nome do Comprador:</label>
+                <input type="text" id="comprador" name="comprador">
+
+                <label for="valor">Valor do Lote:</label>
+                <input type="number" id="valor" name="valor">
+
+                <label for="tamanho">Tamanho do Lote:</label>
+                <input type="text" id="tamanho" name="tamanho">
+
+                <label for="parcelas">Número de Parcelas:</label>
+                <input type="number" id="parcelas" name="parcelas">
+
+                <button type="submit" id="save-button">Adicionar Comprador</button>
+            </form>
+
+            <div id="details-section" class="hidden">
+                <h3>Detalhes do Comprador</h3>
+                <p id="comprador-nome"></p>
+                <p id="comprador-valor"></p>
+                <p id="valor-restante"></p>
+                <p id="comprador-tamanho"></p>
+                <p id="comprador-parcelas"></p>
+                <p id="comprador-parcelasrestantes"></p>
+            </div>
+
+            <div id="payment-section" class="hidden">
+                <label for="parcela">Valor da Parcela Recebida:</label>
+                <input type="number" id="parcela" name="parcela">
+
+                <button type="button" id="add-parcela">Adicionar Parcela</button>
+
+                <h3>Histórico de Pagamentos</h3>
+                <ul id="historico"></ul>
+            </div>
+
+            <button type="button" id="delete-lote">Remover Lote</button>
         </div>
     </div>
-</div>
-
-    <!-- Inclua os scripts do Firebase com CDN e o seu script JS -->
-   
+    
     <script src="script.js" type="module"></script>
 </body>
 </html>
