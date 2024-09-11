@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             paymentSection.classList.remove('hidden');
 
             compradorNomeElem.textContent = `Nome do Comprador: ${loteData.comprador || 'N/A'}`;
-            compradorValorElem.textContent = `Valor do Lote: R$ ${loteData.valor || 'N/A'}`;
+            compradorValorElem.textContent = `Valor do Lote: R$ ${(loteData.valor || 'N/A')}`;
             compradorTamanhoElem.textContent = `Tamanho do Lote: ${loteData.tamanho || 'N/A'} M²`;
             compradorParcelasElem.textContent = `Número de Parcelas: ${loteData.parcelas || 'N/A'}`;
             const pagamentos = loteData.pagamentos || [];
