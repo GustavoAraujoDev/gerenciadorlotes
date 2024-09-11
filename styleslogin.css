@@ -42,6 +42,15 @@ h2 {
     font-size: 16px;
 }
 
+.logo{
+    border-radius: 50%;
+    height: 215px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    
+}
+
 button {
     width: 100%;
     padding: 12px;
