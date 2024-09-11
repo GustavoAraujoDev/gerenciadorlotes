@@ -23,6 +23,10 @@ h1 {
     display: flex;
     flex-wrap: wrap;
 }
+.paymentForm{
+    display: flex;
+    flex-wrap: wrap;
+}
 
 .lote {
     width: 100px;

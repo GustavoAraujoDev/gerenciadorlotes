@@ -65,7 +65,17 @@
             <div id="payment-section" class="hidden">
                 <label for="parcela">Valor da Parcela Recebida:</label>
                 <input type="number" id="parcela" name="parcela">
-
+                <form id="paymentForm" class="paymentForm" >
+                    <label>
+                      <input type="radio" name="paymentMethod" value="Pix"  required /> Pix
+                    </label><br />
+                    <label>
+                      <input type="radio" name="paymentMethod" value="Espécie"  /> Espécie
+                    </label><br />
+                    <label>
+                      <input type="radio" name="paymentMethod" value="Cartão"  /> Cartão
+                    </label><br />
+                  </form>
                 <button type="button" id="add-parcela"><i class="bi bi-plus-square-dotted"></i> Adicionar Parcela </button>
 
                 <h3>Histórico de Pagamentos</h3>

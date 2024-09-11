@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function calcularValorRestante(loteData) {
       const valorTotal = parseFloat(loteData.valor) || 0;
       const pagamentos = loteData.pagamentos || [];
-      const totalPago = pagamentos.reduce((acc, p) => acc + parseFloat(p.replace('R$', '').trim()), 0);
+      const totalPago = pagamentos.reduce((acc, p) => acc + parseFloat(p.replace('R$', '',).trim()), 0);
       const valorRestante = valorTotal - totalPago;
       return valorRestante;
   }
@@ -143,13 +143,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Função para adicionar um pagamento (parcela)
     async function addParcela() {
         const parcelaValue = parcelaInput.value;
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+        console.log(selectedPaymentMethod);
+        
         if (!parcelaValue) {
             alert('Por favor, insira o valor da parcela.');
             return;
         }
-
+        if (!selectedPaymentMethod) {
+          alert('Por favor, insira um metodo de pagamento.');
+          return;
+      }
+        const selectedPayment = selectedPaymentMethod.value;
+        console.log(selectedPayment);
         const now = new Date();
-        const pagamento = `R$ ${parcelaValue} - ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        const pagamento = `R$ ${parcelaValue} - ${selectedPayment} - ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        
 
         if (loteAtual) {
             const pagamentosRef = ref(database, `lotes/${loteAtual}/pagamentos`);
@@ -157,11 +166,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const pagamentos = snapshot.val() || [];
 
             pagamentos.push(pagamento);
-            if (confirm('Tem certeza de que deseja remover este lote?')) {
+            if (confirm('Tem certeza de que deseja adicionar essa parcela?')) {
             try {
                 await set(pagamentosRef, pagamentos);
                 historico.innerHTML += `<li>${pagamento}</li>`;
                 parcelaInput.value = '';
+                const radio = document.querySelectorAll('input[name="paymentMethod"]:checked');
+             radio.forEach(radio => radio.checked = false);
                 alert('Parcela adicionada com sucesso!');
                  
                  showFeedback('Parcela adicionada com sucesso!');
