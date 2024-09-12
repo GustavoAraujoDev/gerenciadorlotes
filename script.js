@@ -144,7 +144,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function addParcela() {
         const parcelaValue = parcelaInput.value;
         const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-        console.log(selectedPaymentMethod);
         
         if (!parcelaValue) {
             alert('Por favor, insira o valor da parcela.');
@@ -155,7 +154,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
       }
         const selectedPayment = selectedPaymentMethod.value;
-        console.log(selectedPayment);
         const now = new Date();
         const pagamento = `R$ ${parcelaValue} - ${selectedPayment} - ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
         
@@ -173,6 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 parcelaInput.value = '';
                 const radio = document.querySelectorAll('input[name="paymentMethod"]:checked');
              radio.forEach(radio => radio.checked = false);
+             gerarComprovantePagamento(parcelaValue, selectedPayment, comprador, pagamentos);
                 alert('Parcela adicionada com sucesso!');
                  
                  showFeedback('Parcela adicionada com sucesso!');
@@ -183,6 +182,96 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
     }
+
+// Função para gerar o comprovante de pagamento em PDF com layout profissional e histórico de pagamentos anteriores
+async function gerarComprovantePagamento(parcelaValue, selectedPayment, comprador, pagamentos) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const loteRef = ref(database, `lotes/${loteAtual}`);
+        const snapshot = await get(loteRef);
+        const loteData = snapshot.val();
+
+    // Adiciona a logo no topo à esquerda
+    const logo = 'logo.jpeg'; // Substitua pela sua imagem base64 ou URL da imagem
+    doc.addImage(logo, 'JPEG', 10, 10, 40, 20); // Posição x, y, largura, altura
+
+    // Informações da empresa à direita
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('Gerenciador de Lotes', 195, 15, { align: 'right' });
+    doc.setFontSize(10);
+    doc.setFont('Helvetica', 'normal');
+    doc.text('www.suaempresa.com', 195, 22, { align: 'right' });
+    doc.text('(11) 1234-5678', 195, 28, { align: 'right' });
+    doc.text('gerenciadorlotes@suaempresa.com', 195, 34, { align: 'right' });
+
+    // Título centralizado do comprovante
+    doc.setFontSize(20);
+    doc.setFont('Helvetica', 'bold');
+    doc.text('Comprovante de Pagamento', 105, 50, { align: 'center' });
+
+    // Caixa ao redor do conteúdo principal
+    doc.setLineWidth(0.5);
+    doc.rect(10, 60, 190, 150); // Ajusta o tamanho da caixa conforme necessário
+
+    // Informações do comprador e pagamento
+    doc.setFontSize(12);
+    doc.setFont('Helvetica', 'bold');
+    doc.text('Nome do Comprador:', 15, 75);
+    doc.text('Lote:', 15, 85);
+    doc.text('Valor da Parcela:', 15, 95);
+    doc.text('Método de Pagamento:', 15, 105);
+    doc.text('Data do Pagamento:', 15, 115);
+
+    // Valores das informações
+    doc.setFont('Helvetica', 'normal');
+
+    // Ajuste automático do texto
+    function fitText(text, x, y, maxWidth) {
+        let fontSize = 12;
+        while (doc.getTextWidth(text) > maxWidth && fontSize > 6) {
+            fontSize -= 0.5;
+            doc.setFontSize(fontSize);
+        }
+        doc.text(text, x, y);
+        doc.setFontSize(12); // Restaura o tamanho da fonte padrão
+    }
+
+    fitText(loteData.comprador, 60, 75, 130);
+    fitText(loteAtual, 60, 85, 130);
+    fitText(`R$ ${parcelaValue}`, 60, 95, 130);
+    fitText(`${selectedPayment}`, 63, 105, 130);
+
+    const now = new Date();
+    const dataPagamento = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+    fitText(dataPagamento, 60, 115, 130);
+
+    // Histórico de pagamentos anteriores
+    doc.setFont('Helvetica', 'bold');
+    doc.text('Histórico de Pagamentos:', 15, 135);
+    doc.setFont('Helvetica', 'normal');
+
+    // Ajuste o layout para o histórico de pagamentos
+    let yPos = 145;
+    pagamentos.forEach(p => {
+        fitText(p, 20, yPos, 180);
+        yPos += 10;
+    });
+
+    // Linha divisória antes do rodapé
+    doc.line(10, yPos + 10, 200, yPos + 10);
+
+    // Rodapé com agradecimento e informações adicionais
+    doc.setFontSize(10);
+    doc.setFont('Helvetica', 'italic');
+    fitText('Obrigado pela sua confiança!', 65, yPos + 20, 180);
+    doc.setFont('Helvetica', 'normal');
+    fitText('Este é um comprovante oficial.', 65, yPos + 25, 180);
+    fitText('Todos os direitos reservados - Gerenciador de Lotes', 65, yPos + 30, 180);
+
+    // Salva o PDF com nome personalizado
+    doc.save(`Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`);
+}
 
     // Função para deletar um lote
     async function deleteLote() {
