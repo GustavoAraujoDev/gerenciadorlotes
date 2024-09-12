@@ -271,6 +271,18 @@ async function gerarComprovantePagamento(parcelaValue, selectedPayment, comprado
 
     // Salva o PDF com nome personalizado
     doc.save(`Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`);
+     // Alternativa para salvar o PDF em dispositivos móveis
+     const pdfBlob = doc.output('blob');
+     const pdfUrl = URL.createObjectURL(pdfBlob);
+ 
+     // Cria um link e simula um clique para download
+     const link = document.createElement('a');
+     link.href = pdfUrl;
+     link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
+     document.body.appendChild(link);
+     link.click();
+     document.body.removeChild(link);
+     URL.revokeObjectURL(pdfUrl);
 }
 
     // Função para deletar um lote
