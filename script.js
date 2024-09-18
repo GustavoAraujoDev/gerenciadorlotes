@@ -315,6 +315,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     if (baixar) {
+      const pdfBlob = doc.output("blob");
+      // Salva o PDF com nome personalizado
+      saveAs(pdfBlob, `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
+      );
+    } else {
       // Alternativa para salvar o PDF em dispositivos móveis
       const pdfBlob = doc.output("blob");
       const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -323,11 +328,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const link = document.createElement("a");
       link.href = pdfUrl;
       link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
-      
+      document.body.appendChild(link);
       link.click();
-      
+      document.body.removeChild(link);
       URL.revokeObjectURL(pdfUrl);
     }
+
     // Para iOS, é necessário fazer uma abordagem diferente
     if (
       navigator.userAgent.includes("Safari") &&
