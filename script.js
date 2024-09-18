@@ -316,31 +316,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (baixar) {
       // Detecta se o navegador é o Safari (excluindo Chrome)
-      const isSafari =
-        navigator.userAgent.includes("Safari") &&
-        !navigator.userAgent.includes("Chrome");
+      // Detecta se o navegador é o Safari (excluindo Chrome)
+      const isSafari = /^((?!chrome|android).)*safari/i.test(
+        navigator.userAgent
+      );
 
       if (isSafari) {
         const pdfBlob = doc.output("blob");
         // Abordagem específica para Safari para forçar o download
 
-        // Cria uma URL temporária para o Blob
+        // Para Safari, criamos um iframe que força o download do PDF
         const pdfUrl = URL.createObjectURL(pdfBlob);
-
-        // Cria o link e força o download
-        const link = document.createElement("a");
-        link.href = pdfUrl;
-        link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
-        document.body.appendChild(link);
-
-        // Simula o clique para iniciar o download
-        link.click();
-
-        // Limpa o link após um curto intervalo
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none"; // Esconde o iframe
+        iframe.src = pdfUrl;
+        document.body.appendChild(iframe);
+        // Remove o iframe após o uso
         setTimeout(() => {
-          document.body.removeChild(link);
-          URL.revokeObjectURL(pdfUrl);
-        }, 100);
+          document.body.removeChild(iframe);
+          URL.revokeObjectURL(pdfUrl); // Libera a memória
+        }, 1000);
       } else {
         const pdfBlob = doc.output("blob");
         // Salva o PDF com nome personalizado
