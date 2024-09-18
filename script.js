@@ -315,41 +315,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     if (baixar) {
-      const pdfBlob = doc.output("blob");
-      // Salva o PDF com nome personalizado
-      saveAs(pdfBlob, `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
-      );
-    } else {
-      // Alternativa para salvar o PDF em dispositivos móveis
-      const pdfBlob = doc.output("blob");
-      const pdfUrl = URL.createObjectURL(pdfBlob);
+      // Detecta se o navegador é o Safari (excluindo Chrome)
+      const isSafari =
+        navigator.userAgent.includes("Safari") &&
+        !navigator.userAgent.includes("Chrome");
 
-      // Cria um link e simula um clique para download
-      const link = document.createElement("a");
-      link.href = pdfUrl;
-      link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(pdfUrl);
-    }
+      if (isSafari) {
+        const pdfBlob = doc.output("blob");
+        // Abordagem específica para Safari para forçar o download
 
-    // Para iOS, é necessário fazer uma abordagem diferente
-    if (
-      navigator.userAgent.includes("Safari") &&
-      !navigator.userAgent.includes("Chrome")
-    ) {
-      // Simula o clique no link e então remove o link
-      link.click();
-      setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(pdfUrl);
-      }, 100);
-    } else {
-      // Chrome e outros navegadores
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(pdfUrl);
+        // Cria uma URL temporária para o Blob
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        // Cria o link e força o download
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
+        document.body.appendChild(link);
+
+        // Simula o clique para iniciar o download
+        link.click();
+
+        // Limpa o link após um curto intervalo
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(pdfUrl);
+        }, 100);
+      } else {
+        const pdfBlob = doc.output("blob");
+        // Salva o PDF com nome personalizado
+        saveAs(
+          pdfBlob,
+          `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
+        );
+      }
     }
   }
 
