@@ -323,9 +323,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const link = document.createElement("a");
       link.href = pdfUrl;
       link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
-      document.body.appendChild(link);
+      
       link.click();
-      document.body.removeChild(link);
+      
       URL.revokeObjectURL(pdfUrl);
     }
     // Para iOS, é necessário fazer uma abordagem diferente
