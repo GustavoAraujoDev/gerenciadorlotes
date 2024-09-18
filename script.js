@@ -315,11 +315,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     if (baixar) {
-      // Salva o PDF com nome personalizado
-      doc.save(
-        `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
-      );
-    } else {
       // Alternativa para salvar o PDF em dispositivos móveis
       const pdfBlob = doc.output("blob");
       const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -333,7 +328,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(pdfUrl);
     }
-
     // Para iOS, é necessário fazer uma abordagem diferente
     if (
       navigator.userAgent.includes("Safari") &&
