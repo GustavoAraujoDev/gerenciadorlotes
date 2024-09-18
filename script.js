@@ -311,35 +311,43 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     const baixar = window.confirm(
-      `Você Gostaria De Baixar o Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
+      `Você gostaria de baixar o comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf?`
     );
+    
     const pdfBlob = doc.output("blob");
-    // Abordagem específica para Safari para forçar o download
-
+    
     // Cria uma URL temporária para o Blob
     const pdfUrl = URL.createObjectURL(pdfBlob);
-
+    
     // Cria o link e força o download
     const link = document.createElement("a");
     link.href = pdfUrl;
     link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
+    
+    // Adiciona atributos para ajudar na compatibilidade
+    link.setAttribute('rel', 'noopener noreferrer');
+    link.style.display = 'none';
     document.body.appendChild(link);
-
+    
     if (baixar) {
-    // Simula o clique para iniciar o download
-    link.click();
-
-    // Limpa o link após um curto intervalo
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(pdfUrl);
-    }, 1000);
-  }else {
-    const pdfBlob = doc.output("blob");
-      // Salva o PDF com nome personalizado
-      saveAs(pdfBlob, `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
-      );
-  }
+      // Simula o clique para iniciar o download
+      link.click();
+    
+      // Limpa o link após um curto intervalo
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(pdfUrl);
+      }, 1000);
+    } else {
+      // No Safari, pode ser necessário usar a abordagem do saveAs
+      if (window.navigator.msSaveOrOpenBlob) {
+        // Para IE
+        window.navigator.msSaveOrOpenBlob(pdfBlob, `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`);
+      } else {
+        // Para outros navegadores que suportam saveAs
+        saveAs(pdfBlob, `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`);
+      }
+    }
   }
 
   // Função para deletar um lote
