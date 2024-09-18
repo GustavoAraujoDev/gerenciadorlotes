@@ -310,23 +310,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       180
     );
 
-    // Salva o PDF com nome personalizado
-    doc.save(
-      `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
+    const baixar = window.confirm(
+      `Você Gostaria De Baixar o Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
     );
 
-    // Alternativa para salvar o PDF em dispositivos móveis
-    const pdfBlob = doc.output("blob");
-    const pdfUrl = URL.createObjectURL(pdfBlob);
+    if (baixar) {
+      // Salva o PDF com nome personalizado
+      doc.save(
+        `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
+      );
+    } else {
+      // Alternativa para salvar o PDF em dispositivos móveis
+      const pdfBlob = doc.output("blob");
+      const pdfUrl = URL.createObjectURL(pdfBlob);
 
-    // Cria um link e simula um clique para download
-    const link = document.createElement("a");
-    link.href = pdfUrl;
-    link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(pdfUrl);
+      // Cria um link e simula um clique para download
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(pdfUrl);
+    }
 
     // Para iOS, é necessário fazer uma abordagem diferente
     if (
