@@ -313,38 +313,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     const baixar = window.confirm(
       `Você Gostaria De Baixar o Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
     );
+    const pdfBlob = doc.output("blob");
+    // Abordagem específica para Safari para forçar o download
+
+    // Cria uma URL temporária para o Blob
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+
+    // Cria o link e força o download
+    const link = document.createElement("a");
+    link.href = pdfUrl;
+    link.download = `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`;
+    document.body.appendChild(link);
 
     if (baixar) {
-      // Detecta se o navegador é o Safari (excluindo Chrome)
-      // Detecta se o navegador é o Safari (excluindo Chrome)
-      const isSafari = /^((?!chrome|android).)*safari/i.test(
-        navigator.userAgent
+    // Simula o clique para iniciar o download
+    link.click();
+
+    // Limpa o link após um curto intervalo
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(pdfUrl);
+    }, 1000);
+  }else {
+    const pdfBlob = doc.output("blob");
+      // Salva o PDF com nome personalizado
+      saveAs(pdfBlob, `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
       );
-
-      if (isSafari) {
-        const pdfBlob = doc.output("blob");
-        // Abordagem específica para Safari para forçar o download
-
-        // Para Safari, criamos um iframe que força o download do PDF
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none"; // Esconde o iframe
-        iframe.src = pdfUrl;
-        document.body.appendChild(iframe);
-        // Remove o iframe após o uso
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-          URL.revokeObjectURL(pdfUrl); // Libera a memória
-        }, 1000);
-      } else {
-        const pdfBlob = doc.output("blob");
-        // Salva o PDF com nome personalizado
-        saveAs(
-          pdfBlob,
-          `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
-        );
-      }
-    }
+  }
   }
 
   // Função para deletar um lote
