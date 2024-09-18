@@ -314,7 +314,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       `Você gostaria de baixar o comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf?`
     );
     
-    const pdfBlob = doc.output("blob");
+    const pdfBlob = new Blob([doc.output()], { type: 'application/pdf' });
     
     // Cria uma URL temporária para o Blob
     const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -333,6 +333,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Simula o clique para iniciar o download
       link.click();
     
+      saveAs(pdfBlob, `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`);
+
       // Limpa o link após um curto intervalo
       setTimeout(() => {
         document.body.removeChild(link);
