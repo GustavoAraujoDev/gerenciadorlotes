@@ -6,22 +6,49 @@ body {
     background-color: #f0f0f0;
 }
 
+.legenda {
+    border: 2px solid #333;
+    border-radius: 20px;
+}
+
 .container {
     width: 80%;
     margin: auto;
     overflow: hidden;
+    display: grid;
+    gap: 15px;
 }
-.container p {
+.container p, h3, h5 {
     text-align: center;
+}
+h4{
+    transform: rotate(-90deg);
+    transform-origin: bottom right;
+    
 }
 h1 {
     text-align: center;
     margin: 20px 0;
 }
 
-.terreno {
+.Terreno{
+    display: grid;
+    gap: 30px;
+}
+
+.rua{
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.quadra {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 0;
+
 }
 .paymentForm{
     display: flex;
@@ -31,15 +58,15 @@ h1 {
 .lote {
     width: 100px;
     height: 100px;
+    padding: 0;
     border: 2px solid #333;
-    margin: 10px;
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #ffffff;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    flex: 1 1 25%;
 }
 
 .lote:hover {
@@ -157,4 +184,12 @@ button:hover {
 
 #historico li:last-child {
     border-bottom: none;
+}
+@media(max-width: 600px){
+    .rua{
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 70px ;
+    }
 }

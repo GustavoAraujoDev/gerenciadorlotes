@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Terrenos</title>
-    <link rel="stylesheet" href="styles.css">
     <link rel="shortcut icon" href="logo.jpeg" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -13,23 +13,91 @@
 <body>
     <div class="container">
         <button onclick="window.location.href = 'index.html'"><i class="bi bi-box-arrow-left"> Sair </i></button>
-        <h1>Gerenciamento de Vendas de Terreno</h1>
-        <p>Estrada</p>
-        <div class="terreno">
+        <h1>Gerenciamento Loteamento Carvoeiro</h1>
+        <div class="rua">
+        <h4>Rua</h4>
+        
+        <div class="Terreno">
+        <p>Quadra F</p>
+        <div class="quadra">
             <!-- Lotes -->
+            <div class="lote" data-lote="45">Lote 45</div>
+            <div class="lote" data-lote="46">Lote 46</div>
+            <div class="lote" data-lote="47">Lote 47</div>
+            <div class="lote" data-lote="48">Lote 48</div>
+            <div class="lote" data-lote="41">Lote 41</div>
+            <div class="lote" data-lote="42">Lote 42</div>
+            <div class="lote" data-lote="43">Lote 43</div>
+            <div class="lote" data-lote="44">Lote 44</div>
+        </div>
+        <p>Quadra E</p>
+        <div class="quadra">
+            <!-- Lotes -->
+            <div class="lote" data-lote="37">Lote 37</div>
+            <div class="lote" data-lote="38">Lote 38</div>
+            <div class="lote" data-lote="39">Lote 39</div>
+            <div class="lote" data-lote="40">Lote 40</div>
+            <div class="lote" data-lote="33">Lote 33</div>
+            <div class="lote" data-lote="34">Lote 34</div>
+            <div class="lote" data-lote="35">Lote 35</div>
+            <div class="lote" data-lote="36">Lote 36</div>
+        </div>
+        <p>Quadra D</p>
+        <div class="quadra">
+            <!-- Lotes -->
+            <div class="lote" data-lote="29">Lote 29</div>
+            <div class="lote" data-lote="30">Lote 30</div>
+            <div class="lote" data-lote="31">Lote 31</div>
+            <div class="lote" data-lote="32">Lote 32</div>
+            <div class="lote" data-lote="25">Lote 25</div>
+            <div class="lote" data-lote="26">Lote 26</div>
+            <div class="lote" data-lote="27">Lote 27</div>
+            <div class="lote" data-lote="28">Lote 28</div> 
+        </div>
+        <p>Quadra C</p>
+        <div class="quadra">
+            <!-- Lotes -->
+            <div class="lote" data-lote="21">Lote 21</div>
+            <div class="lote" data-lote="22">Lote 22</div>
+            <div class="lote" data-lote="23">Lote 23</div>
+            <div class="lote" data-lote="24">Lote 24</div>
+            <div class="lote" data-lote="17">Lote 17</div>
+            <div class="lote" data-lote="18">Lote 18</div>
+            <div class="lote" data-lote="19">Lote 19</div>
+            <div class="lote" data-lote="20">Lote 20</div>
+        </div>
+        <p>Quadra B</p>
+        <div class="quadra">
+            <!-- Lotes -->
+            <div class="lote" data-lote="13">Lote 13</div>
+            <div class="lote" data-lote="14">Lote 14</div>
+            <div class="lote" data-lote="15">Lote 15</div>
+            <div class="lote" data-lote="16">Lote 16</div>
+            <div class="lote" data-lote="9">Lote 9</div>
+            <div class="lote" data-lote="10">Lote 10</div>
+            <div class="lote" data-lote="11">Lote 11</div>
+            <div class="lote" data-lote="12">Lote 12</div>
+        </div>
+        <p>Quadra A</p>
+        <div class="quadra">
+            <!-- Lotes -->
+            <div class="lote" data-lote="5">Lote 5</div>
+            <div class="lote" data-lote="6">Lote 6</div>
+            <div class="lote" data-lote="7">Lote 3</div>
+            <div class="lote" data-lote="8">Lote 8</div>
             <div class="lote" data-lote="1">Lote 1</div>
             <div class="lote" data-lote="2">Lote 2</div>
             <div class="lote" data-lote="3">Lote 3</div>
             <div class="lote" data-lote="4">Lote 4</div>
-            <div class="lote" data-lote="5">Lote 5</div>
-            <div class="lote" data-lote="6">Lote 6</div>
-            <div class="lote" data-lote="7">Lote 7</div>
-            <!-- Adicione mais lotes conforme necessário -->
         </div>
-        <h4 style="color: #00a000;">Lote Verde - Ocupado</h4>
-        <h4 style="color: #ffff;">Lote Branco - Livre</h4>
-        <h3 id="feedback-message" class="hidden"></h3> <!-- Mensagem de feedback -->
-
+        </div>
+    </div>
+    <h3>Estrada Carvoeiro</h3>
+    <div class="legenda">
+        <h3>Legenda</h3>
+        <h5 style="color: #00a000;">Lote Verde - Ocupado</h5>
+        <h5 style="color: #ffff;">Lote Branco - Livre</h5>
+    </div>
     </div>
 
     <!-- Modal para detalhes do lote -->
@@ -46,8 +114,11 @@
                 <label for="valor">Valor do Lote:</label>
                 <input type="number" id="valor" name="valor">
 
-                <label for="tamanho">Tamanho do Lote M²:</label>
-                <input type="text" id="tamanho" name="tamanho">
+                <label for="tamanho">Comprimento do Lote M:</label>
+                <input type="text" id="Comprimento" name="Comprimento">
+
+                <label for="tamanho">Largura do Lote M:</label>
+                <input type="text" id="Largura" name="Largura">
 
                 <label for="parcelas">Número de Parcelas:</label>
                 <input type="number" id="parcelas" name="parcelas">
@@ -60,7 +131,8 @@
                 <p id="comprador-nome"></p>
                 <p id="comprador-valor"></p>
                 <p id="valor-restante"></p>
-                <p id="comprador-tamanho"></p>
+                <p id="comprador-Comprimento"></p>
+                <p id="comprador-Largura"></p>
                 <p id="comprador-parcelas"></p>
                 <p id="comprador-parcelasrestantes"></p>
             </div>
@@ -69,7 +141,7 @@
                 <label for="parcela">Valor da Parcela Recebida:</label>
                 <input type="number" id="parcela" name="parcela">
                 <form id="paymentForm" class="paymentForm" >
-                    <h4>Método de Pagamento</h4>
+                    <h3>Método de Pagamento</h3>
                     <label>
                       <input type="radio" name="paymentMethod" value="Pix"  required /> Pix
                     </label><br />

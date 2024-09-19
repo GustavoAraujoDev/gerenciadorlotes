@@ -32,11 +32,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const availabilityMessage = document.getElementById("availability-message");
   const compradorNomeElem = document.getElementById("comprador-nome");
   const compradorValorElem = document.getElementById("comprador-valor");
-  const compradorTamanhoElem = document.getElementById("comprador-tamanho");
+  const compradorComprimentoElem = document.getElementById("comprador-Comprimento");
+  const compradorLarguraElem = document.getElementById("comprador-Largura");
   const compradorParcelasElem = document.getElementById("comprador-parcelas");
-  const compradorParcelasRestantesElem = document.getElementById(
-    "comprador-parcelasrestantes"
-  );
+  const compradorParcelasRestantesElem = document.getElementById("comprador-parcelasrestantes");
   const valorRestanteElem = document.getElementById("valor-restante"); // Novo campo para valor restante
   const historico = document.getElementById("historico");
   const parcelaInput = document.getElementById("parcela");
@@ -88,6 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       loteForm.classList.add("hidden");
       detailsSection.classList.remove("hidden");
       paymentSection.classList.remove("hidden");
+      deleteLoteButton.classList.remove("hidden")
 
       compradorNomeElem.textContent = `Nome do Comprador: ${
         loteData.comprador || "N/A"
@@ -95,9 +95,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       compradorValorElem.textContent = `Valor do Lote: R$ ${
         loteData.valor || "N/A"
       }`;
-      compradorTamanhoElem.textContent = `Tamanho do Lote: ${
-        loteData.tamanho || "N/A"
-      } M²`;
+      compradorLarguraElem.textContent = `Largura do Lote: ${
+        loteData.Largura || "N/A"
+      } M`;
+      compradorComprimentoElem.textContent = `Comprimento do Lote: ${
+        loteData.Comprimento || "N/A"
+      } M`;
       compradorParcelasElem.textContent = `Número de Parcelas: ${
         loteData.parcelas || "N/A"
       }`;
@@ -111,6 +114,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         2
       )}`;
 
+      if (valorRestante <= 0) {
+        parcelaInput.disabled = true;
+      }
+
       const parcelasRestantes = loteData.parcelas - pagamentos.length;
       compradorParcelasRestantesElem.textContent = `Parcelas Restantes: ${parcelasRestantes}`;
     } else {
@@ -121,6 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       loteElement.classList.remove("occupied");
       loteElement.classList.add("available");
+      deleteLoteButton.classList.add("hidden")
     }
   }
 
@@ -128,10 +136,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function saveLoteDetails() {
     const comprador = document.getElementById("comprador").value;
     const valor = document.getElementById("valor").value;
-    const tamanho = document.getElementById("tamanho").value;
+    const Comprimento = document.getElementById("Comprimento").value;
+    const Largura = document.getElementById("Largura").value;
     const numParcelas = document.getElementById("parcelas").value;
 
-    if (!comprador || !valor || !tamanho || !numParcelas) {
+    if (!comprador || !valor || !Comprimento || !numParcelas || !Largura) {
       alert("Por favor, preencha todos os detalhes do lote.");
       return;
     }
@@ -141,7 +150,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const loteData = {
         comprador,
         valor,
-        tamanho,
+        Comprimento,
+        Largura,
         parcelas: numParcelas,
         pagamentos: [], // Inicializa com array vazio
       };
@@ -163,7 +173,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Função para adicionar um pagamento (parcela)
-  async function addParcela() {
+  async function addParcela(loteId) {
+    const loteRef = ref(database, `lotes/${loteId}`);
+  const snapshot = await get(loteRef);
+  const loteData = snapshot.val();
+  
+  // Cálculo do valor restante
+  const valorRestante = calcularValorRestante(loteData);
+    // Cálculo do valor restante
     const parcelaValue = parcelaInput.value;
     const selectedPaymentMethod = document.querySelector(
       'input[name="paymentMethod"]:checked'
@@ -177,6 +194,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("Por favor, insira um metodo de pagamento.");
       return;
     }
+    if (parcelaValue > valorRestante) {
+      alert(`O valor da parcela (R$ ${parcelaValue}) é maior que o valor restante (R$ ${valorRestante}).`);
+      return; // Impede que a parcela seja adicionada
+    }
+ 
     const selectedPayment = selectedPaymentMethod.value;
     const now = new Date();
     const pagamento = `R$ ${parcelaValue} - ${selectedPayment} - ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
@@ -203,7 +225,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             pagamentos
           );
           alert("Parcela adicionada com sucesso!");
-
+          updateLoteStatus(loteId);
           showFeedback("Parcela adicionada com sucesso!");
         } catch (error) {
           console.error("Erro ao adicionar parcela:", error);
@@ -351,6 +373,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   }
+  
+  async function loadImageAsBase64(url) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
 
   // Função para deletar um lote
   async function deleteLote() {
@@ -391,8 +424,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Evento para adicionar uma nova parcela
   const addParcelaButton = document.getElementById("add-parcela");
-  addParcelaButton.addEventListener("click", addParcela);
-
+  addParcelaButton.addEventListener("click",  (e) => {
+    e.preventDefault();
+    addParcela(loteAtual); // Chama a função passando o ID do lote atual
+  });
   // Evento para deletar um lote
   const deleteLoteButton = document.getElementById("delete-lote");
   deleteLoteButton.addEventListener("click", deleteLote);
