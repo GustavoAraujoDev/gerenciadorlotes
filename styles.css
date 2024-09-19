@@ -18,17 +18,39 @@ body {
     display: grid;
     gap: 15px;
 }
-.container p, h3, h5 {
+.container p , h3{
     text-align: center;
+}
+h3{
+    text-align: center;
+    font-size: 1.4rem;
+}
+.legenda h3 {
+    color: #495057;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.legenda h5 {
+    font-size: 1rem;
+    color: #212529;
+    margin: 5px 0;
+    text-align: center;
+}
+
+h5 {
+    color: inherit;
 }
 h4{
     transform: rotate(-90deg);
     transform-origin: bottom right;
-    
+    font-size: 1.2rem;
 }
 h1 {
     text-align: center;
     margin: 20px 0;
+    font-size: 2.5rem;
 }
 
 .Terreno{
@@ -67,7 +89,9 @@ h1 {
     background-color: #ffffff;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    font-size: 1rem;
 }
+
 
 .lote:hover {
     background-color: #e0e0e0;
@@ -148,7 +172,7 @@ button {
     background-color: #2bff00;
     color: #fff;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1rem;
     transition: background-color 0.4s ease, tranform 0.3s ease;
 }
 
