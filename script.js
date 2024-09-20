@@ -403,6 +403,8 @@ if (baixar) {
    // Salvando o PDF com um nome significativo
    doc.save(`Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`);
  
+}else{
+  return;
 }
     };
   
