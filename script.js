@@ -235,6 +235,69 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  async function gerarComprovantePagamento(
+    parcelaValue,
+    selectedPayment,
+    comprador,
+    pagamentos
+  ) {
+    const { jsPDF } = window.jspdf;
+  
+    const loteRef = ref(database, `lotes/${loteAtual}`);
+    const snapshot = await get(loteRef);
+    const loteData = snapshot.val();
+  
+    // Obtenha o elemento da imagem
+    const img = document.getElementById('logo');
+    const url = new URL(img.src, window.location.origin).href;
+    const image = new Image();
+    image.src = url;
+    
+    // Certifique-se de que a imagem esteja totalmente carregada
+    image.crossOrigin = 'Anonymous'; // Para evitar problemas de CORS
+  
+    image.onload = function() {
+      console.log("Imagem carregada com sucesso.");
+  
+      // Cria um canvas para desenhar a imagem
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+  
+      // Defina as dimensões do canvas conforme a imagem
+      canvas.width = image.naturalWidth; 
+      canvas.height = image.naturalHeight;
+  
+      // Desenha a imagem no canvas
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  
+      // Converte o canvas em uma URL de dados base64
+      const base64Image = canvas.toDataURL('image/jpeg');
+      console.log("Imagem convertida para base64:", base64Image);
+  
+      // Cria o documento jsPDF
+      const doc = new jsPDF();
+      console.log("PDF criado.");
+  
+      // Adiciona a imagem base64 ao PDF
+      doc.addImage(base64Image, 'JPEG', 10, 5, 40, 40);
+      console.log("Imagem adicionada ao PDF.");
+  
+      // Exemplo de adição de texto ao PDF
+      doc.setFontSize(12);
+      doc.text(`Comprovante de Pagamento - ${comprador.nome}`, 10, 60);
+      doc.text(`Parcela: ${parcelaValue}`, 10, 70);
+      doc.text(`Pagamento: ${selectedPayment}`, 10, 80);
+      
+      // Salvando o PDF com um nome significativo
+      doc.save(`comprovante_pagamento_${comprador.nome}.pdf`);
+    };
+  
+    // Caso a imagem já esteja pré-carregada (cache), dispare o evento onload manualmente
+    if (image.complete) {
+      image.onload();
+      console.log("Imagem já estava carregada.");
+    }
+  }
   
 // Função para carregar a imagem como base64
 async function getImageBase64(imageId) {
