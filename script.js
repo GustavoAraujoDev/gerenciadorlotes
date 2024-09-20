@@ -277,25 +277,138 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Cria o documento jsPDF
       const doc = new jsPDF();
       console.log("PDF criado.");
+
+
+      // Configuração do documento
+const pageHeight = 297; // Altura de uma página A4 em mm
+const marginTop = 20;
+const marginBottom = 10;
+let currentY = marginTop; // Posição Y inicial
+
+// Função para adicionar nova página se necessário
+function checkPageSpace(neededSpace) {
+  if (currentY + neededSpace > pageHeight - marginBottom) {
+    doc.addPage(); // Adiciona nova página
+    currentY = marginTop; // Reseta Y para o topo da nova página
+  }
+}
+
+// Caixa ao redor do conteúdo principal
+function drawContentBox(height) {
+  doc.setLineWidth(0.5);
+  doc.rect(10, 60, 190, height); // Caixa ajustada conforme necessário
+}
+
+// Função para ajuste de texto com limite de largura e controle de nova página
+function fitText(text, x, y, maxWidth, lineHeight) {
+  const fontSize = 12;
+  let adjustedFontSize = fontSize;
+
+  // Reduzir tamanho da fonte até caber na largura máxima
+  while (doc.getTextWidth(text) > maxWidth && adjustedFontSize > 6) {
+    adjustedFontSize -= 0.5;
+    doc.setFontSize(adjustedFontSize);
+  }
+
+  // Verificar se há espaço suficiente, senão criar nova página
+  checkPageSpace(lineHeight);
+
+  // Inserir o texto na posição atual
+  doc.text(text, x, y);
+
+  // Restaurar tamanho original da fonte
+  doc.setFontSize(fontSize);
+  currentY += lineHeight; // Atualizar Y atual
+}
   
       // Adiciona a imagem base64 ao PDF
       doc.addImage(base64Image, 'JPEG', 10, 5, 40, 40);
       console.log("Imagem adicionada ao PDF.");
   
-      // Exemplo de adição de texto ao PDF
-      doc.setFontSize(12);
-      doc.text(`Comprovante de Pagamento - ${comprador.nome}`, 10, 60);
-      doc.text(`Parcela: ${parcelaValue}`, 10, 70);
-      doc.text(`Pagamento: ${selectedPayment}`, 10, 80);
-      
-      // Salvando o PDF com um nome significativo
-      doc.save(`comprovante_pagamento_${comprador.nome}.pdf`);
+   // Informações da empresa à direita
+   doc.setFont("Helvetica", "bold");
+   doc.setFontSize(16);
+   doc.text("Loteamento Carvoeiro", 195, 15, { align: "right" });
+   doc.setFontSize(10);
+   doc.setFont("Helvetica", "normal");
+   doc.text("www.loteamentocarvoeiro.com", 195, 22, { align: "right" });
+   doc.text("(88) 9 9710-9959", 195, 28, { align: "right" });
+   doc.text("loteamentocarvoeiro@gmail.com", 195, 34, { align: "right" });
+
+   // Título centralizado do comprovante
+  doc.setFontSize(20);
+  doc.setFont("Helvetica", "bold");
+  doc.text("Comprovante de Pagamento", 105, 55, { align: "center" });
+
+  // Caixa ao redor do conteúdo principal
+  doc.setLineWidth(0.3);
+  doc.rect(10, 60, 190, 50);
+  
+ // Cabeçalhos de informações do comprador e pagamento
+doc.setFont("Helvetica", "bold");
+doc.setFontSize(12);
+fitText("Nome do Comprador:", 15, 65, 130, 10);
+fitText("Lote:", 15, 75, 130, 10);
+fitText("Valor da Parcela:", 15, 85, 130, 10);
+fitText("Método de Pagamento:", 15, 95, 130, 10);
+fitText("Data do Pagamento:", 15, 105, 130, 10);
+
+// Inserir valores dinâmicos das informações
+doc.setFont("Helvetica", "normal");
+fitText(loteData.comprador, 60, 65, 130, 10);
+fitText(loteAtual, 60, 75, 130, 10);
+fitText(`R$ ${parcelaValue}`, 60, 85, 130, 10);
+fitText(`${selectedPayment}`, 63, 95, 130, 10);
+
+// Data e hora atuais
+const now = new Date();
+const dataPagamento = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+fitText(dataPagamento, 60, 105, 130, 10);
+
+// Histórico de pagamentos anteriores
+doc.setFont("Helvetica", "bold");
+fitText("Histórico de Pagamentos:", 15, 120, 180, 10);
+doc.setFont("Helvetica", "normal");
+
+// Layout dinâmico para o histórico de pagamentos
+pagamentos.forEach((p) => {
+  fitText(p, 20, currentY, 180, 10); // Verifica e ajusta para nova página se necessário
+});
+
+// Linha divisória antes do rodapé
+checkPageSpace(20); // Verificar espaço para a linha e o rodapé
+doc.line(10, currentY + 10, 200, currentY + 10);
+currentY += 20; // Mover a posição Y após a linha
+
+// Rodapé
+doc.setFontSize(10);
+doc.setFont("Helvetica", "italic");
+fitText("Obrigado pela sua confiança!", 65, currentY, 180, 10);
+doc.setFont("Helvetica", "normal");
+fitText("Este é um comprovante oficial.", 65, currentY, 180, 10);
+fitText(
+  "Todos os direitos reservados - Gerenciador de Lotes",
+  65,
+  currentY,
+  180,
+  10
+);
+
+ 
+
+const baixar = window.confirm(
+  `Você gostaria de baixar o comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf?`
+);
+if (baixar) {
+   // Salvando o PDF com um nome significativo
+   doc.save(`Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`);
+ 
+}
     };
   
     // Caso a imagem já esteja pré-carregada (cache), dispare o evento onload manualmente
     if (image.complete) {
       image.onload();
-      console.log("Imagem já estava carregada.");
     }
   }
   
