@@ -32,14 +32,97 @@ document.addEventListener("DOMContentLoaded", async () => {
   const availabilityMessage = document.getElementById("availability-message");
   const compradorNomeElem = document.getElementById("comprador-nome");
   const compradorValorElem = document.getElementById("comprador-valor");
-  const compradorComprimentoElem = document.getElementById("comprador-Comprimento");
+  const compradorComprimentoElem = document.getElementById(
+    "comprador-Comprimento"
+  );
   const compradorLarguraElem = document.getElementById("comprador-Largura");
   const compradorParcelasElem = document.getElementById("comprador-parcelas");
-  const compradorParcelasRestantesElem = document.getElementById("comprador-parcelasrestantes");
+  const compradorParcelasRestantesElem = document.getElementById(
+    "comprador-parcelasrestantes"
+  );
   const valorRestanteElem = document.getElementById("valor-restante"); // Novo campo para valor restante
   const historico = document.getElementById("historico");
+  const agrupamentomessage = document.getElementById("agrupamento-message");
   const parcelaInput = document.getElementById("parcela");
+  const toggleSelectionButton = document.getElementById("toggle-divisao");
+
   let loteAtual = null;
+  let isSelecting = false;
+  let selectedLote = null;
+
+  toggleSelectionButton.addEventListener("click", () => {
+    if (!isSelecting) {
+      ativarSelecao();
+    } else {
+      dividirLote();
+    }
+  });
+
+  function ativarSelecao() {
+    isSelecting = true;
+    toggleSelectionButton.textContent = "Dividir";
+
+    // Adiciona evento para clicar nas divs e selecionar
+    document.querySelectorAll(".lote").forEach((lote) => {
+      lote.addEventListener("click", selecionarLotedivisao);
+    });
+  }
+
+  function selecionarLotedivisao(event) {
+    if (selectedLote) {
+      // Se já houver uma div selecionada, remove a classe de seleção
+      selectedLote.classList.remove("lote-selecionado");
+    }
+    selectedLote = event.target;
+    estilizarLoteSelecionado(selectedLote, true);
+    console.log(selectedLote);
+  }
+
+  function estilizarLoteSelecionado(lotediv, status) {
+    if (!lotediv) {
+      toastr.error("lote invalido");
+      return;
+    }
+    switch (status) {
+      case true:
+        lotediv.style.backgroundColor = "#a1d6ff"; // Cor de fundo para indicar seleção
+        lotediv.style.border = "2px solid green"; // Adiciona uma borda
+        lotediv.style.color = "black"; // Cor do texto
+        break;
+      case false:
+        lotediv.style.backgroundColor = "#fff"; // Cor original do lotediv
+        lotediv.style.border = "none"; // Remove a borda
+        lotediv.style.color = "black"; // Cor original do texto
+        break;
+      case "agrupado":
+        lotediv.style.backgroundColor = "#ffcc99"; // Cor original do lotediv
+        lotediv.style.border = "none"; // Remove a borda
+        lotediv.style.color = "black"; // Cor original do texto
+      default:
+        break;
+    }
+  }
+
+  function dividirLote() {
+    if (selectedLote) {
+      // Criar duas novas divs para substituir a div selecionada
+      const newLote1 = document.createElement("div");
+      newLote1.classList.add("lote");
+      newLote1.textContent = `${loteAtual} A`;
+
+      const newLote2 = document.createElement("div");
+      newLote2.classList.add("lote");
+      newLote2.textContent = `${loteAtual} B`;
+
+      // Substituir a div original pelas duas novas
+      selectedLote.appendChild(newLote1);
+      selectedLote.appendChild(newLote2);
+      // Limpar a seleção
+      selectedLote = null;
+      isSelecting = false;
+      toggleSelectionButton.textContent = "Ativar Divisão";
+    }
+  }
 
   function calcularValorRestante(loteData) {
     const valorTotal = parseFloat(loteData.valor) || 0;
@@ -54,28 +137,57 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Função para verificar o status de todos os lotes
   async function checkLotesStatus() {
-    for (let i = 1; i <= 7; i++) {
-      // Supondo que tenha 7 lotes
+    for (let i = 1; i <= 48; i++) {
+      // Referência ao lote no banco de dados
       const loteRef = ref(database, `lotes/${i}`);
       const snapshot = await get(loteRef);
       const loteData = snapshot.val();
       const loteElement = document.querySelector(`[data-lote="${i}"]`);
 
-      if (loteData) {
-        // Se o lote estiver ocupado, aplica a classe "occupied"
-        loteElement.classList.add("occupied");
-        loteElement.classList.remove("available");
-      } else {
-        // Se o lote estiver disponível, aplica a classe "available"
-        loteElement.classList.add("available");
-        loteElement.classList.remove("occupied");
+      if (!loteElement) {
+        toastr.warning(`Elemento do lote ${i} não encontrado. `);
+        return;
+      }
+
+      if (loteData && loteElement.hasAttribute("data-agrupamento")) {
+        loteElement.classList.add("agrupadoocupado");
+        console.log(loteData && loteElement.hasAttribute("data-agrupamento"));
+      }
+      if (loteData && !loteElement.hasAttribute("data-agrupamento")) {
+        loteElement.classList.add("semagrupamentoocupado");
+        console.log(loteData && !loteElement.hasAttribute("data-agrupamento"));
+      }
+      if (!loteData && !loteElement.hasAttribute("data-agrupamento")) {
+        loteElement.classList.add("semagrupamentolivre");
+        console.log(!loteData && !loteElement.hasAttribute("data-agrupamento"));
+      }
+      if (!loteData && loteElement.hasAttribute("data-agrupamento")) {
+        loteElement.classList.add("agrupadolivre");
+        console.log(!loteData && loteElement.hasAttribute("data-agrupamento"));
       }
     }
   }
 
-  // Chama a função para checar o status dos lotes ao carregar a página
-  await checkLotesStatus();
+  function checkAgrupStatus(loteAtual) {
+    agrupamentomessage.textContent = "Lote não faz parte de nenhum agrupamento"; // Mensagem padrão
+    let fund = false;
+    const loteElement = document.querySelector(`[data-lote="${loteAtual}"]`);
+    const agrupamentoId = loteElement.getAttribute("data-agrupamento");
 
+    // Verifica se o lote atual faz parte de um agrupamento
+    if (agrupamentoId) {
+      agrupamentomessage.textContent = `O lote ${loteAtual} faz parte do agrupamento ${agrupamentoId}`;
+      fund = true;
+    }
+
+    if (!fund) {
+      console.log("Nenhum agrupamento encontrado para o lote atual.");
+    }
+  }
+  // Chama a função para checar o status dos lotes ao carregar a página
+  await carregarAgrupamentos();
+  await checkLotesStatus();
+  limparCampos();
   // Função para abrir o modal de um lote e verificar o status
   async function updateLoteStatus(loteId) {
     const loteRef = ref(database, `lotes/${loteId}`);
@@ -87,7 +199,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       loteForm.classList.add("hidden");
       detailsSection.classList.remove("hidden");
       paymentSection.classList.remove("hidden");
-      deleteLoteButton.classList.remove("hidden")
+      deleteLoteButton.classList.remove("hidden");
 
       compradorNomeElem.textContent = `Nome do Comprador: ${
         loteData.comprador || "N/A"
@@ -128,12 +240,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       loteElement.classList.remove("occupied");
       loteElement.classList.add("available");
-      deleteLoteButton.classList.add("hidden")
+      deleteLoteButton.classList.add("hidden");
+    }
+  }
+  // Função para adicionar um novo comprador ao lote
+  async function saveLoteDetailsfull(loteid) {
+    const agrupamentosRef = ref(database, "agrupamentos");
+    const agrupamentosSnapshot = await get(agrupamentosRef);
+
+    if (agrupamentosSnapshot.exists()) {
+      const agrupamentos = agrupamentosSnapshot.val();
+      for (const agrupamentoId of Object.keys(agrupamentos)) {
+        const agrupamentoData = agrupamentos[agrupamentoId];
+        if (agrupamentoData.lotes.includes(loteid)) {
+          console.log("deu certo");
+          await Promise.all(
+            agrupamentoData.lotes.map(async (id) => {
+              await saveLoteDetails(id);
+            })
+          );
+          return;
+        } else {
+          await saveLoteDetails(loteid);
+        }
+      }
     }
   }
 
-  // Função para adicionar um novo comprador ao lote
-  async function saveLoteDetails() {
+  async function saveLoteDetails(lote) {
     const comprador = document.getElementById("comprador").value;
     const valor = document.getElementById("valor").value;
     const Comprimento = document.getElementById("Comprimento").value;
@@ -141,12 +275,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const numParcelas = document.getElementById("parcelas").value;
 
     if (!comprador || !valor || !Comprimento || !numParcelas || !Largura) {
-      alert("Por favor, preencha todos os detalhes do lote.");
+      toastr.error("Por favor, preencha todos os detalhes do lote.", "error");
       return;
     }
 
     if (loteAtual) {
-      const loteRef = ref(database, `lotes/${loteAtual}`);
+      const loteRef = ref(database, `lotes/${lote}`);
       const loteData = {
         comprador,
         valor,
@@ -158,79 +292,134 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       try {
         await set(loteRef, loteData);
-        alert("Comprador adicionado com sucesso!");
+        toastr.success("Comprador adicionado com sucesso!", "sucesso");
         loteForm.classList.add("hidden");
         detailsSection.classList.remove("hidden");
         paymentSection.classList.remove("hidden");
-        updateLoteStatus(loteAtual); // Atualiza os detalhes
+        updateLoteStatus(lote); // Atualiza os detalhes
       } catch (error) {
         console.error("Erro ao salvar o lote:", error);
-        alert("Erro ao salvar os detalhes do lote.");
+        toastr.error("Erro ao salvar os detalhes do lote.", "error");
       }
     } else {
-      alert("Lote inválido.");
+      toastr.error("Lote inválido.", "error");
+    }
+  }
+
+  async function addParcelafull(lote) {
+    const agrupamentosRef = ref(database, "agrupamentos");
+    const agrupamentosSnapshot = await get(agrupamentosRef);
+    if (agrupamentosSnapshot.exists()) {
+      const agrupamentos = agrupamentosSnapshot.val();
+      Object.keys(agrupamentos).forEach(async (agrupamentoId) => {
+        const agrupamentoData = agrupamentos[agrupamentoId];
+        console.log(agrupamentoData);
+        if (agrupamentoData.lotes.includes(lote)) {
+          console.log(agrupamentoData.lotes.includes(lote));
+          const result = await Swal.fire({
+            title: "Adicionar parcela?",
+            text: "Deseja adicionar a parcela para este lote?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, adicionar!",
+            cancelButtonText: "Cancelar",
+            background: "#2f2f2f",
+            color: "#fff",
+          });
+          if (result.isConfirmed) {
+            console.log("deu certo");
+            await Promise.all(
+              agrupamentoData.lotes.map(async (id) => {
+                await addParcelasave(id);
+                console.log(`add parcela ${id}`);
+              })
+            );
+            return;
+          }
+        } else {
+          // Se o lote não estiver no agrupamento
+          const result = await Swal.fire({
+            title: "Adicionar parcela?",
+            text: "Deseja adicionar a parcela para este lote?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, adicionar!",
+            cancelButtonText: "Cancelar",
+            background: "#2f2f2f",
+            color: "#fff",
+          });
+
+          if (result.isConfirmed) {
+            await addParcelasave(lote);
+            return;
+          }
+        }
+      });
     }
   }
 
   // Função para adicionar um pagamento (parcela)
-  async function addParcela(loteId) {
+  async function addParcelasave(loteId) {
     const loteRef = ref(database, `lotes/${loteId}`);
-  const snapshot = await get(loteRef);
-  const loteData = snapshot.val();
-  
-  // Cálculo do valor restante
-  const valorRestante = calcularValorRestante(loteData);
-    // Cálculo do valor restante
-    const parcelaValue = parcelaInput.value;
+    const snapshot = await get(loteRef);
+    const loteData = snapshot.val();
     const selectedPaymentMethod = document.querySelector(
       'input[name="paymentMethod"]:checked'
     );
+    let gerarcomprovantecheck = false;
+    console.log(gerarcomprovantecheck);
+    const parcelavalue = parcelaInput.value;
+    console.log(selectedPaymentMethod);
+    // Cálculo do valor restante
+    const valorRestante = calcularValorRestante(loteData);
+    // Cálculo do valor restante
 
-    if (!parcelaValue) {
-      alert("Por favor, insira o valor da parcela.");
+    if (!parcelavalue) {
+      toastr.error("Por favor, insira o valor da parcela.");
       return;
     }
-    if (!selectedPaymentMethod) {
-      alert("Por favor, insira um metodo de pagamento.");
-      return;
-    }
-    if (parcelaValue > valorRestante) {
-      alert(`O valor da parcela (R$ ${parcelaValue}) é maior que o valor restante (R$ ${valorRestante}).`);
+
+    if (parcelavalue > valorRestante) {
+      toastr.warning(
+        `O valor da parcela (R$ ${parcelavalue}) é maior que o valor restante (R$ ${valorRestante}).`,
+        "Aviso"
+      );
       return; // Impede que a parcela seja adicionada
     }
- 
+    if (!selectedPaymentMethod) {
+      toastr.error("Por favor, insira um metodo de pagamento.");
+      return;
+    }
     const selectedPayment = selectedPaymentMethod.value;
+    console.log(selectedPayment);
+
     const now = new Date();
-    const pagamento = `R$ ${parcelaValue} - ${selectedPayment} - ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+    const pagamento = `R$ ${parcelavalue} - ${selectedPayment} - ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
 
     if (loteAtual) {
-      const pagamentosRef = ref(database, `lotes/${loteAtual}/pagamentos`);
+      const pagamentosRef = ref(database, `lotes/${loteId}/pagamentos`);
       const snapshot = await get(pagamentosRef);
       const pagamentos = snapshot.val() || [];
 
       pagamentos.push(pagamento);
-      if (confirm("Tem certeza de que deseja adicionar essa parcela?")) {
-        try {
-          await set(pagamentosRef, pagamentos);
-          historico.innerHTML += `<li>${pagamento}</li>`;
-          parcelaInput.value = "";
-          const radio = document.querySelectorAll(
-            'input[name="paymentMethod"]:checked'
-          );
-          radio.forEach((radio) => (radio.checked = false));
-          gerarComprovantePagamento(
-            parcelaValue,
-            selectedPayment,
-            comprador,
-            pagamentos
-          );
-          alert("Parcela adicionada com sucesso!");
-          updateLoteStatus(loteId);
-          showFeedback("Parcela adicionada com sucesso!");
-        } catch (error) {
-          console.error("Erro ao adicionar parcela:", error);
-          alert("Erro ao adicionar a parcela.");
+
+      try {
+        await set(pagamentosRef, pagamentos);
+        historico.innerHTML += `<li>${pagamento}</li>`;
+        if (!gerarcomprovantecheck) {
+          gerarComprovantePagamento(parcelavalue, selectedPayment, pagamentos);
+          gerarcomprovantecheck = true;
         }
+
+        toastr.success("Parcela adicionada com sucesso!");
+        updateLoteStatus(loteId);
+      } catch (error) {
+        console.error("Erro ao adicionar parcela:", error);
+        toastr.error("Erro ao adicionar a parcela.");
       }
     }
   }
@@ -238,204 +427,197 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function gerarComprovantePagamento(
     parcelaValue,
     selectedPayment,
-    comprador,
     pagamentos
   ) {
     const { jsPDF } = window.jspdf;
-  
+
     const loteRef = ref(database, `lotes/${loteAtual}`);
     const snapshot = await get(loteRef);
     const loteData = snapshot.val();
-  
+
     // Obtenha o elemento da imagem
-    const img = document.getElementById('logo');
+    const img = document.getElementById("logo");
     const url = new URL(img.src, window.location.origin).href;
     const image = new Image();
     image.src = url;
-    
+
     // Certifique-se de que a imagem esteja totalmente carregada
-    image.crossOrigin = 'Anonymous'; // Para evitar problemas de CORS
-  
-    image.onload = function() {
-      console.log("Imagem carregada com sucesso.");
-  
+    image.crossOrigin = "Anonymous"; // Para evitar problemas de CORS
+
+    image.onload = async function () {
       // Cria um canvas para desenhar a imagem
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-  
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
       // Defina as dimensões do canvas conforme a imagem
-      canvas.width = image.naturalWidth; 
+      canvas.width = image.naturalWidth;
       canvas.height = image.naturalHeight;
-  
+
       // Desenha a imagem no canvas
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-  
+
       // Converte o canvas em uma URL de dados base64
-      const base64Image = canvas.toDataURL('image/jpeg');
-      console.log("Imagem convertida para base64:", base64Image);
-  
+      const base64Image = canvas.toDataURL("image/jpeg");
+
       // Cria o documento jsPDF
       const doc = new jsPDF();
-      console.log("PDF criado.");
-
 
       // Configuração do documento
-const pageHeight = 297; // Altura de uma página A4 em mm
-const marginTop = 20;
-const marginBottom = 10;
-let currentY = marginTop; // Posição Y inicial
+      const pageHeight = 297; // Altura de uma página A4 em mm
+      const marginTop = 20;
+      const marginBottom = 10;
+      let currentY = marginTop; // Posição Y inicial
 
-// Função para adicionar nova página se necessário
-function checkPageSpace(neededSpace) {
-  if (currentY + neededSpace > pageHeight - marginBottom) {
-    doc.addPage(); // Adiciona nova página
-    currentY = marginTop; // Reseta Y para o topo da nova página
-  }
-}
+      // Função para adicionar nova página se necessário
+      function checkPageSpace(neededSpace) {
+        if (currentY + neededSpace > pageHeight - marginBottom) {
+          doc.addPage(); // Adiciona nova página
+          currentY = marginTop; // Reseta Y para o topo da nova página
+        }
+      }
 
-// Caixa ao redor do conteúdo principal
-function drawContentBox(height) {
-  doc.setLineWidth(0.5);
-  doc.rect(10, 60, 190, height); // Caixa ajustada conforme necessário
-}
+      // Caixa ao redor do conteúdo principal
+      function drawContentBox(height) {
+        doc.setLineWidth(0.5);
+        doc.rect(10, 60, 190, height); // Caixa ajustada conforme necessário
+      }
 
-// Função para ajuste de texto com limite de largura e controle de nova página
-function fitText(text, x, y, maxWidth, lineHeight) {
-  const fontSize = 12;
-  let adjustedFontSize = fontSize;
+      // Função para ajuste de texto com limite de largura e controle de nova página
+      function fitText(text, x, y, maxWidth, lineHeight) {
+        const fontSize = 12;
+        let adjustedFontSize = fontSize;
 
-  // Reduzir tamanho da fonte até caber na largura máxima
-  while (doc.getTextWidth(text) > maxWidth && adjustedFontSize > 6) {
-    adjustedFontSize -= 0.5;
-    doc.setFontSize(adjustedFontSize);
-  }
+        // Reduzir tamanho da fonte até caber na largura máxima
+        while (doc.getTextWidth(text) > maxWidth && adjustedFontSize > 6) {
+          adjustedFontSize -= 0.5;
+          doc.setFontSize(adjustedFontSize);
+        }
 
-  // Verificar se há espaço suficiente, senão criar nova página
-  checkPageSpace(lineHeight);
+        // Verificar se há espaço suficiente, senão criar nova página
+        checkPageSpace(lineHeight);
 
-  // Inserir o texto na posição atual
-  doc.text(text, x, y);
+        // Inserir o texto na posição atual
+        doc.text(text, x, y);
 
-  // Restaurar tamanho original da fonte
-  doc.setFontSize(fontSize);
-  currentY += lineHeight; // Atualizar Y atual
-}
-  
+        // Restaurar tamanho original da fonte
+        doc.setFontSize(fontSize);
+        currentY += lineHeight; // Atualizar Y atual
+      }
+
       // Adiciona a imagem base64 ao PDF
-      doc.addImage(base64Image, 'JPEG', 10, 5, 40, 40);
+      doc.addImage(base64Image, "JPEG", 10, 5, 40, 40);
       console.log("Imagem adicionada ao PDF.");
-  
-   // Informações da empresa à direita
-   doc.setFont("Helvetica", "bold");
-   doc.setFontSize(16);
-   doc.text("Loteamento Carvoeiro", 195, 15, { align: "right" });
-   doc.setFontSize(10);
-   doc.setFont("Helvetica", "normal");
-   doc.text("www.loteamentocarvoeiro.com", 195, 22, { align: "right" });
-   doc.text("(88) 9 9710-9959", 195, 28, { align: "right" });
-   doc.text("loteamentocarvoeiro@gmail.com", 195, 34, { align: "right" });
 
-   // Título centralizado do comprovante
-  doc.setFontSize(20);
-  doc.setFont("Helvetica", "bold");
-  doc.text("Comprovante de Pagamento", 105, 55, { align: "center" });
+      // Informações da empresa à direita
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Loteamento Carvoeiro", 195, 15, { align: "right" });
+      doc.setFontSize(10);
+      doc.setFont("Helvetica", "normal");
+      doc.text("www.loteamentocarvoeiro.com", 195, 22, { align: "right" });
+      doc.text("(88) 9 9710-9959", 195, 28, { align: "right" });
+      doc.text("loteamentocarvoeiro@gmail.com", 195, 34, { align: "right" });
 
-  // Caixa ao redor do conteúdo principal
-  doc.setLineWidth(0.3);
-  doc.rect(10, 60, 190, 50);
-  
- // Cabeçalhos de informações do comprador e pagamento
-doc.setFont("Helvetica", "bold");
-doc.setFontSize(12);
-fitText("Nome do Comprador:", 15, 65, 130, 10);
-fitText("Lote:", 15, 75, 130, 10);
-fitText("Valor da Parcela:", 15, 85, 130, 10);
-fitText("Método de Pagamento:", 15, 95, 130, 10);
-fitText("Data do Pagamento:", 15, 105, 130, 10);
+      // Título centralizado do comprovante
+      doc.setFontSize(20);
+      doc.setFont("Helvetica", "bold");
+      doc.text("Comprovante de Pagamento", 105, 55, { align: "center" });
 
-// Inserir valores dinâmicos das informações
-doc.setFont("Helvetica", "normal");
-fitText(loteData.comprador, 60, 65, 130, 10);
-fitText(loteAtual, 60, 75, 130, 10);
-fitText(`R$ ${parcelaValue}`, 60, 85, 130, 10);
-fitText(`${selectedPayment}`, 63, 95, 130, 10);
+      // Caixa ao redor do conteúdo principal
+      doc.setLineWidth(0.3);
+      doc.rect(10, 60, 190, 50);
 
-// Data e hora atuais
-const now = new Date();
-const dataPagamento = now.toLocaleDateString() + " " + now.toLocaleTimeString();
-fitText(dataPagamento, 60, 105, 130, 10);
+      // Cabeçalhos de informações do comprador e pagamento
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(12);
+      fitText("Nome do Comprador:", 15, 65, 130, 10);
+      fitText("Lote:", 15, 75, 130, 10);
+      fitText("Valor da Parcela:", 15, 85, 130, 10);
+      fitText("Método de Pagamento:", 15, 95, 130, 10);
+      fitText("Data do Pagamento:", 15, 105, 130, 10);
 
-// Histórico de pagamentos anteriores
-doc.setFont("Helvetica", "bold");
-fitText("Histórico de Pagamentos:", 15, 120, 180, 10);
-doc.setFont("Helvetica", "normal");
+      // Inserir valores dinâmicos das informações
+      doc.setFont("Helvetica", "normal");
+      fitText(loteData.comprador, 60, 65, 130, 10);
+      fitText(loteAtual, 60, 75, 130, 10);
+      fitText(`R$ ${parcelaValue}`, 60, 85, 130, 10);
+      fitText(`${selectedPayment}`, 63, 95, 130, 10);
 
-// Layout dinâmico para o histórico de pagamentos
-pagamentos.forEach((p) => {
-  fitText(p, 20, currentY, 180, 10); // Verifica e ajusta para nova página se necessário
-});
+      // Data e hora atuais
+      const now = new Date();
+      const dataPagamento =
+        now.toLocaleDateString() + " " + now.toLocaleTimeString();
+      fitText(dataPagamento, 60, 105, 130, 10);
 
-// Linha divisória antes do rodapé
-checkPageSpace(20); // Verificar espaço para a linha e o rodapé
-doc.line(10, currentY + 10, 200, currentY + 10);
-currentY += 20; // Mover a posição Y após a linha
+      // Histórico de pagamentos anteriores
+      doc.setFont("Helvetica", "bold");
+      fitText("Histórico de Pagamentos:", 15, 120, 180, 10);
+      doc.setFont("Helvetica", "normal");
 
-// Rodapé
-doc.setFontSize(10);
-doc.setFont("Helvetica", "italic");
-fitText("Obrigado pela sua confiança!", 65, currentY, 180, 10);
-doc.setFont("Helvetica", "normal");
-fitText("Este é um comprovante oficial.", 65, currentY, 180, 10);
-fitText(
-  "Todos os direitos reservados - Gerenciador de Lotes",
-  65,
-  currentY,
-  180,
-  10
-);
+      // Layout dinâmico para o histórico de pagamentos
+      pagamentos.forEach((p) => {
+        fitText(p, 20, currentY, 180, 10); // Verifica e ajusta para nova página se necessário
+      });
 
- 
+      // Linha divisória antes do rodapé
+      checkPageSpace(20); // Verificar espaço para a linha e o rodapé
+      doc.line(10, currentY + 10, 200, currentY + 10);
+      currentY += 20; // Mover a posição Y após a linha
 
-const baixar = window.confirm(
-  `Você gostaria de baixar o comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf?`
-);
-if (baixar) {
-   // Salvando o PDF com um nome significativo
-   doc.save(`Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`);
- 
-}else{
-  return;
-}
+      // Rodapé
+      doc.setFontSize(10);
+      doc.setFont("Helvetica", "italic");
+      fitText("Obrigado pela sua confiança!", 65, currentY, 180, 10);
+      doc.setFont("Helvetica", "normal");
+      fitText("Este é um comprovante oficial.", 65, currentY, 180, 10);
+      fitText(
+        "Todos os direitos reservados - Gerenciador de Lotes",
+        65,
+        currentY,
+        180,
+        10
+      );
+      const result = await Swal.fire({
+        title: "Baixar Comprovante?",
+        text: `Você gostaria de baixar o comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sim, Baixar!",
+        cancelButtonText: "Cancelar",
+        background: "#2f2f2f",
+        color: "#fff",
+      });
+      if (result.isConfirmed) {
+        // Salvando o PDF com um nome significativo
+        doc.save(
+          `Comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf`
+        );
+      }
     };
-  
+
     // Caso a imagem já esteja pré-carregada (cache), dispare o evento onload manualmente
     if (image.complete) {
       image.onload();
     }
   }
-  
-// Função para carregar a imagem como base64
-async function getImageBase64(imageId) {
-  return new Promise((resolve, reject) => {
-    const img = document.getElementById(imageId);
-    if (img) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      canvas.toDataURL('image/jpeg', (dataUrl) => {
-        resolve(dataUrl);
-      });
-    } else {
-      reject('Imagem não encontrada');
-    }
-  });
-}
 
   // Função para deletar um lote
   async function deleteLote() {
-    if (confirm("Tem certeza de que deseja remover este lote?")) {
+    const result = await Swal.fire({
+      title: "Remover Lotes?",
+      text: "Deseja Remover este lote?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sim, Remover!",
+      cancelButtonText: "Cancelar",
+      background: "#2f2f2f",
+      color: "#fff",
+    });
+    if (result.isConfirmed) {
       const loteRef = ref(database, `lotes/${loteAtual}`);
       await remove(loteRef);
       modal.style.display = "none";
@@ -443,7 +625,7 @@ async function getImageBase64(imageId) {
       loteForm.classList.remove("hidden");
       detailsSection.classList.add("hidden");
       paymentSection.classList.add("hidden");
-      alert("Lote removido com sucesso!");
+      toastr.success("Lote removido com sucesso!");
     }
   }
 
@@ -455,7 +637,7 @@ async function getImageBase64(imageId) {
       loteAtual = loteId;
       updateLoteStatus(loteId);
       modal.style.display = "flex";
-
+      checkAgrupStatus(loteAtual);
     });
   });
 
@@ -468,16 +650,178 @@ async function getImageBase64(imageId) {
   const saveButton = document.getElementById("save-button");
   saveButton.addEventListener("click", (e) => {
     e.preventDefault();
-    saveLoteDetails();
+    saveLoteDetailsfull(loteAtual);
+    checkLotesStatus();
   });
 
   // Evento para adicionar uma nova parcela
   const addParcelaButton = document.getElementById("add-parcela");
-  addParcelaButton.addEventListener("click",  (e) => {
+  addParcelaButton.addEventListener("click", (e) => {
     e.preventDefault();
-    addParcela(loteAtual); // Chama a função passando o ID do lote atual
+    addParcelafull(loteAtual); // Chama a função passando o ID do lote atual
   });
   // Evento para deletar um lote
   const deleteLoteButton = document.getElementById("delete-lote");
-  deleteLoteButton.addEventListener("click", deleteLote);
+  deleteLoteButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    deleteLote();
+    checkLotesStatus();
+  });
+
+  let isAgrupamentoAtivado = false;
+  let lotesSelecionados = [];
+  let agrupamentos = {}; // Para armazenar agrupamentos de lotes
+
+  const toggleAgrupamentoBtn = document.getElementById("toggle-agrupamento");
+
+  toggleAgrupamentoBtn.addEventListener("click", function () {
+    if (!isAgrupamentoAtivado) {
+      ativarAgrupamento();
+    } else {
+      confirmarDesativacaoAgrupamento();
+    }
+  });
+
+  function ativarAgrupamento() {
+    isAgrupamentoAtivado = true;
+    toggleAgrupamentoBtn.textContent = "Desativar Agrupamento";
+    lotesSelecionados = [];
+    document.querySelectorAll(".lote").forEach((lote) => {
+      lote.addEventListener("click", selecionarLote);
+    });
+  }
+
+  async function desativarAgrupamento() {
+    isAgrupamentoAtivado = false;
+    toggleAgrupamentoBtn.textContent = "Ativar Agrupamento";
+    document.querySelectorAll(".lote").forEach((lote) => {
+      lote.removeEventListener("click", selecionarLote);
+    });
+    salvarAgrupamento();
+  }
+
+  function selecionarLote(event) {
+    const lote = event.target;
+    const loteId = lote.getAttribute("data-lote");
+    const agrupamentoId = lote.getAttribute("data-agrupamento");
+
+    // Verifica se o lote já faz parte de um agrupamento
+    if (agrupamentoId) {
+      toastr.warning(
+        `O lote ${loteId} já faz parte do agrupamento ${agrupamentoId}. Não pode ser selecionado.`,
+        "Aviso"
+      );
+      estilizarLoteSelecionado(lote, "agrupado");
+      return; // Impede a seleção do lote
+    }
+
+    // Verifica se o lote já está selecionado
+    if (lotesSelecionados.includes(loteId)) {
+      // Se já estiver selecionado, remove da lista e remove a classe de cor
+      lotesSelecionados = lotesSelecionados.filter((id) => id !== loteId);
+      estilizarLoteSelecionado(lote, false);
+    } else {
+      // Se não estiver selecionado, adiciona à lista e aplica a classe de cor
+      lotesSelecionados.push(loteId);
+      estilizarLoteSelecionado(lote, true);
+    }
+
+    console.log("Lotes selecionados: ", lotesSelecionados);
+  }
+  async function confirmarDesativacaoAgrupamento() {
+    const result = await Swal.fire({
+      title: "Salvar Agrupamento?",
+      text: "Tem certeza que deseja desativar o agrupamento e salvar os lotes?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sim, Salvar!",
+      cancelButtonText: "Cancelar",
+      background: "#2f2f2f",
+      color: "#fff",
+    });
+    if (result.isConfirmed) {
+      desativarAgrupamento();
+    }
+  }
+
+  async function salvarAgrupamento() {
+    if (lotesSelecionados.length > 0) {
+      const agrupamentoId = lotesSelecionados; // ID único para o agrupamento
+      const agrupamentoData = { lotes: lotesSelecionados };
+
+      console.log("Salvando agrupamento:", agrupamentoData); // Verifica os dados a serem salvos
+
+      // Referência ao banco de dados para salvar o agrupamento
+      const agrupamentoRef = ref(database, `agrupamentos/${agrupamentoId}`);
+
+      try {
+        // Salva os lotes selecionados no agrupamento no Firebase
+        await set(agrupamentoRef, agrupamentoData);
+
+        lotesSelecionados.forEach((loteId) => {
+          const lote = document.querySelector(`[data-lote="${loteId}"]`);
+          lote.setAttribute("data-agrupamento", agrupamentoId);
+          availabilityMessage.textContent = `Agrupamento ${agrupamentoId}`;
+          lote.classList.remove("selecionado");
+        });
+
+        console.log("Agrupamento salvo no Firebase:", agrupamentos);
+      } catch (error) {
+        console.error("Erro ao salvar agrupamento no Firebase:", error);
+        toastr.error("Erro ao salvar agrupamento.", "Error");
+      }
+    } else {
+      toastr.error("Nenhum lote foi selecionado para agrupamento.", "Error");
+    }
+  }
+
+  async function carregarAgrupamentos() {
+    const agrupamentosRef = ref(database, "agrupamentos");
+
+    try {
+      const agrupamentosSnapshot = await get(agrupamentosRef);
+      if (agrupamentosSnapshot.exists()) {
+        const agrupamentos = agrupamentosSnapshot.val();
+        console.log(agrupamentos);
+
+        // Limpa a mensagem antes de adicionar novas informações
+        agrupamentomessage.textContent = "";
+
+        // Para cada agrupamento, atribui o data-agrupamento aos lotes correspondentes
+        Object.keys(agrupamentos).forEach((agrupamentoId) => {
+          const agrupamentoData = agrupamentos[agrupamentoId];
+          console.log(agrupamentoData);
+
+          // Atribui o agrupamentoId a cada lote no agrupamento
+          agrupamentoData.lotes.forEach((loteId) => {
+            const loteElement = document.querySelector(
+              `[data-lote="${loteId}"]`
+            );
+
+            // Apenas adiciona a mensagem se o lote existir na página
+            if (loteElement) {
+              loteElement.setAttribute("data-agrupamento", agrupamentoId);
+            }
+          });
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao carregar agrupamentos:", error);
+    }
+  }
+
+  function limparCampos() {
+    parcelaInput.value = "";
+    const radio = document.querySelectorAll(
+      'input[name="paymentMethod"]:checked'
+    );
+    radio.forEach((radio) => (radio.checked = false));
+    document.getElementById("comprador").value = "";
+    document.getElementById("valor").value = "";
+    document.getElementById("Comprimento").value = "";
+    document.getElementById("Largura").value = "";
+    document.getElementById("parcelas").value = "";
+  }
 });

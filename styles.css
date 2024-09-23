@@ -106,6 +106,34 @@ h1 {
     border-color: #333; /* Borda padrão */
 }
 
+.lote-selecionado {
+    background-color: #00ecfd;
+    border-color: #534e00;
+}
+.lote.availableagrup {
+    background-color: #ffffff; /* Branco para disponível */
+    border-color: #333; /* Borda padrão */
+}
+
+/* Lote livre sem agrupamento */
+.semagrupamentolivre {
+  background-color: #fff; /* Verde claro */
+}
+
+/* Lote ocupado sem agrupamento */
+.semagrupamentoocupado {
+  background-color: #ff4500; /* Vermelho claro */
+}
+
+/* Lote livre com agrupamento */
+.agrupadolivre {
+  background-color: #32cd32; /* Azul claro */
+}
+
+/* Lote ocupado com agrupamento */
+.agrupadoocupado {
+  background-color: #4b0082; /* Laranja claro */
+}
 
 /* Modal */
 .modal {
