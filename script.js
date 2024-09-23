@@ -309,59 +309,69 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function addParcelafull(lote) {
     const agrupamentosRef = ref(database, "agrupamentos");
     const agrupamentosSnapshot = await get(agrupamentosRef);
+
     if (agrupamentosSnapshot.exists()) {
-      const agrupamentos = agrupamentosSnapshot.val();
-      Object.keys(agrupamentos).forEach(async (agrupamentoId) => {
-        const agrupamentoData = agrupamentos[agrupamentoId];
-        console.log(agrupamentoData);
-        if (agrupamentoData.lotes.includes(lote)) {
-          console.log(agrupamentoData.lotes.includes(lote));
-          const result = await Swal.fire({
-            title: "Adicionar parcela?",
-            text: "Deseja adicionar a parcela para este lote?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sim, adicionar!",
-            cancelButtonText: "Cancelar",
-            background: "#2f2f2f",
-            color: "#fff",
-          });
-          if (result.isConfirmed) {
-            console.log("deu certo");
-            await Promise.all(
-              agrupamentoData.lotes.map(async (id) => {
-                await addParcelasave(id);
-                console.log(`add parcela ${id}`);
-              })
-            );
-            return;
-          }
-        } else {
-          // Se o lote não estiver no agrupamento
-          const result = await Swal.fire({
-            title: "Adicionar parcela?",
-            text: "Deseja adicionar a parcela para este lote?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sim, adicionar!",
-            cancelButtonText: "Cancelar",
-            background: "#2f2f2f",
-            color: "#fff",
-          });
+        const agrupamentos = agrupamentosSnapshot.val();
 
-          if (result.isConfirmed) {
-            await addParcelasave(lote);
-            return;
-          }
+        // Usando for...of para iterar sobre as chaves dos agrupamentos
+        for (const agrupamentoId of Object.keys(agrupamentos)) {
+            const agrupamentoData = agrupamentos[agrupamentoId];
+            console.log(agrupamentoData);
+
+            if (agrupamentoData.lotes.includes(lote)) {
+                console.log(agrupamentoData.lotes.includes(lote));
+                const result = await Swal.fire({
+                    title: "Adicionar parcela?",
+                    text: "Deseja adicionar a parcela para este lote?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Sim, adicionar!",
+                    cancelButtonText: "Cancelar",
+                    background: "#2f2f2f",
+                    color: "#fff",
+                });
+                console.log(result);
+
+                if (result.isConfirmed) {
+                    console.log("deu certo");
+                    try {
+                        console.log(agrupamentoData.lotes);
+                        await Promise.all(
+                            agrupamentoData.lotes.map(async (id) => {
+                                await addParcelasave(id);
+                                console.log(`add parcela ${id}`);
+                            })
+                        );
+                    } catch (error) {
+                        console.error(error);
+                    }
+                    return; // Certifique-se de sair da função após adicionar as parcelas
+                }
+            } else {
+                // Se o lote não estiver no agrupamento
+                const result = await Swal.fire({
+                    title: "Adicionar parcela?",
+                    text: "Deseja adicionar a parcela para este lote?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Sim, adicionar!",
+                    cancelButtonText: "Cancelar",
+                    background: "#2f2f2f",
+                    color: "#fff",
+                });
+
+                if (result.isConfirmed) {
+                    await addParcelasave(lote);
+                    return; // Certifique-se de sair da função após adicionar a parcela
+                }
+            }
         }
-      });
     }
-  }
-
+}
   // Função para adicionar um pagamento (parcela)
   async function addParcelasave(loteId) {
     const loteRef = ref(database, `lotes/${loteId}`);
