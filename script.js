@@ -184,10 +184,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       agrupamentomessage.textContent = `O lote ${loteAtual} faz parte do agrupamento ${agrupamentoId}`;
       fund = true;
     }
-
-    if (!fund) {
-      toastr.warning("Nenhum agrupamento encontrado para o lote atual.");
-    }
   }
   // Chama a função para checar o status dos lotes ao carregar a página
   await carregarAgrupamentos();
@@ -199,12 +195,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     const snapshot = await get(loteRef);
     const loteData = snapshot.val();
     const loteElement = document.querySelector(`[data-lote="${loteId}"]`);
+    if (loteData && loteElement.hasAttribute("data-agrupamento")) {
+      deleteagrupamentoButton.classList.remove("hidden");
+      deleteLoteButton.classList.add("hidden");
+    }
+    if (loteData && !loteElement.hasAttribute("data-agrupamento")) {
+      deleteagrupamentoButton.classList.add("hidden");
+      deleteLoteButton.classList.remove("hidden");
+    }
+    if (!loteData && !loteElement.hasAttribute("data-agrupamento")) {
+      deleteagrupamentoButton.classList.add("hidden");
+      deleteLoteButton.classList.add("hidden");
+    }
+    if (!loteData && loteElement.hasAttribute("data-agrupamento")) {
+      deleteagrupamentoButton.classList.remove("hidden");
+      deleteLoteButton.classList.add("hidden");
+    }
     if (loteData) {
       availabilityMessage.textContent = "Este lote já está ocupado.";
       loteForm.classList.add("hidden");
       detailsSection.classList.remove("hidden");
       paymentSection.classList.remove("hidden");
-      deleteLoteButton.classList.remove("hidden");
 
       compradorNomeElem.textContent = `Nome do Comprador: ${
         loteData.comprador || "N/A"
@@ -245,7 +256,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       loteElement.classList.remove("occupied");
       loteElement.classList.add("available");
-      deleteLoteButton.classList.add("hidden");
     }
   }
   // Função para adicionar um novo comprador ao lote
@@ -260,18 +270,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (agrupamentoData.lotes.includes(loteid)) {
           await Promise.all(
             agrupamentoData.lotes.map(async (id) => {
-              await saveLoteDetails(id);
+              await saveLoteDetails(id, true);
             })
           );
           return;
         } else {
-          await saveLoteDetails(loteid);
+          await saveLoteDetails(loteid, false);
         }
       }
     }
   }
 
-  async function saveLoteDetails(lote) {
+  async function saveLoteDetails(lote, isPartOfGrouping) {
     const comprador = document.getElementById("comprador").value;
     const valor = document.getElementById("valor").value;
     const Comprimento = document.getElementById("Comprimento").value;
@@ -282,8 +292,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       toastr.error("Por favor, preencha todos os detalhes do lote.", "error");
       return;
     }
-
-    if (loteAtual) {
+    if (isPartOfGrouping) {
       const loteRef = ref(database, `lotes/${lote}`);
       const loteData = {
         comprador,
@@ -305,7 +314,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         toastr.error("Erro ao salvar os detalhes do lote.", "error");
       }
     } else {
-      toastr.error("Lote inválido.", "error");
+      const result = await Swal.fire({
+        title: "Adiciocar Comprador ?",
+        text: "Deseja Adiciocar Comprador a esse Lote?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sim, Remover!",
+        cancelButtonText: "Cancelar",
+        background: "#2bff00",
+        color: "#fff",
+      });
+      if (result.isConfirmed) {
+        const loteRef = ref(database, `lotes/${lote}`);
+        const loteData = {
+          comprador,
+          valor,
+          Comprimento,
+          Largura,
+          parcelas: numParcelas,
+          pagamentos: [], // Inicializa com array vazio
+        };
+
+        try {
+          await set(loteRef, loteData);
+          toastr.success("Comprador adicionado com sucesso!", "sucesso");
+          loteForm.classList.add("hidden");
+          detailsSection.classList.remove("hidden");
+          paymentSection.classList.remove("hidden");
+          updateLoteStatus(lote); // Atualiza os detalhes
+        } catch (error) {
+          toastr.error("Erro ao salvar os detalhes do lote.", "error");
+        }
+      }
     }
   }
 
@@ -330,7 +372,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             cancelButtonColor: "#d33",
             confirmButtonText: "Sim, adicionar!",
             cancelButtonText: "Cancelar",
-            background: "#2f2f2f",
+            background: "#2bff00",
             color: "#fff",
           });
 
@@ -357,7 +399,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             cancelButtonColor: "#d33",
             confirmButtonText: "Sim, adicionar!",
             cancelButtonText: "Cancelar",
-            background: "#2f2f2f",
+            background: "#2bff00",
             color: "#fff",
           });
 
@@ -591,7 +633,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         cancelButtonColor: "#d33",
         confirmButtonText: "Sim, Baixar!",
         cancelButtonText: "Cancelar",
-        background: "#2f2f2f",
+        background: "#2bff00",
         color: "#fff",
       });
       if (result.isConfirmed) {
@@ -635,7 +677,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         cancelButtonColor: "#d33",
         confirmButtonText: "Sim, Remover!",
         cancelButtonText: "Cancelar",
-        background: "#2f2f2f",
+        background: "#2bff00",
         color: "#fff",
       });
       if (result.isConfirmed) {
@@ -672,7 +714,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             cancelButtonColor: "#d33",
             confirmButtonText: "Sim, Remover!",
             cancelButtonText: "Cancelar",
-            background: "#2f2f2f",
+            background: "#2bff00",
             color: "#fff",
           });
 
@@ -722,7 +764,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   saveButton.addEventListener("click", (e) => {
     e.preventDefault();
     saveLoteDetailsfull(loteAtual);
-    checkLotesStatus();
   });
 
   // Evento para adicionar uma nova parcela
@@ -814,7 +855,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       cancelButtonColor: "#d33",
       confirmButtonText: "Sim, Salvar!",
       cancelButtonText: "Cancelar",
-      background: "#2f2f2f",
+      background: "#2bff00",
       color: "#fff",
     });
     if (result.isConfirmed) {
