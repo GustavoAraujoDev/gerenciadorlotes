@@ -271,27 +271,31 @@ button:hover {
 }
 
 /* Overlay cobrindo toda a tela */
-.overlay {
+.checkfund {
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.7); /* Transparência preta */
-  display: grid;
+  z-index: 1; /* Fica no topo */
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* Fica no topo */
 }
 
 /* Conteúdo centralizado */
-.content {
+.check {
   background-color: #fff;
   padding: 20px;
   border-radius: 10px;
   text-align: center;
+  width: 80%;
+ max-width: 600px;
+ min-height: 200px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.5s ease;
+  position: relative;
 }
 
 /* Animação de fade-in */
@@ -333,15 +337,4 @@ button:hover {
   color: #333;
 }
 
-/* Ocultar por padrão */
-.overlay,
-.content {
-  display: none;
-}
 
-/* Exibir quando necessário */
-.overlay.show,
-.content.show {
-  display: flex;
-  flex-direction: column;
-}

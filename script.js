@@ -137,10 +137,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Função para verificar o status de todos os lotes
   async function checkLotesStatus() {
     // Elemento onde as mensagens serão exibidas
-    const overlay = document.getElementById("overlay");
-    const content = document.getElementById("content");
+    const overlay = document.getElementById("checkfund");
+    const content = document.getElementById("check");
 
-    overlay.style.display = "block"; // Exibe o indicador de loading
+    overlay.style.display = "flex"; // Exibe o indicador de loading
     content.style.display = "block"; // Exibe o indicador de loading
 
     for (let i = 1; i <= 48; i++) {
