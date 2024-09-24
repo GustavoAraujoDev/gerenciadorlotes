@@ -319,11 +319,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         text: "Deseja Adiciocar Comprador a esse Lote?",
         icon: "question",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
+        confirmButtonColor: "#2bff00",
         cancelButtonColor: "#d33",
         confirmButtonText: "Sim, Remover!",
         cancelButtonText: "Cancelar",
-        background: "#2bff00",
+        background: "#2f2f2f",
         color: "#fff",
       });
       if (result.isConfirmed) {
@@ -368,11 +368,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             text: "Deseja adicionar a parcela para este lote?",
             icon: "question",
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
+            confirmButtonColor: "#2bff00",
             cancelButtonColor: "#d33",
             confirmButtonText: "Sim, adicionar!",
             cancelButtonText: "Cancelar",
-            background: "#2bff00",
+            background: "#2f2f2f",
             color: "#fff",
           });
 
@@ -395,11 +395,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             text: "Deseja adicionar a parcela para este lote?",
             icon: "question",
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
+            confirmButtonColor: "#2bff00",
             cancelButtonColor: "#d33",
             confirmButtonText: "Sim, adicionar!",
             cancelButtonText: "Cancelar",
-            background: "#2bff00",
+            background: "#2f2f2f",
             color: "#fff",
           });
 
@@ -629,11 +629,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         text: `Você gostaria de baixar o comprovante_${loteData.comprador}_${loteAtual}_(${dataPagamento}).pdf?`,
         icon: "question",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
+        confirmButtonColor: "#2bff00",
         cancelButtonColor: "#d33",
         confirmButtonText: "Sim, Baixar!",
         cancelButtonText: "Cancelar",
-        background: "#2bff00",
+        background: "#2f2f2f",
         color: "#fff",
       });
       if (result.isConfirmed) {
@@ -673,11 +673,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         text: "Deseja Remover este lote?",
         icon: "question",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
+        confirmButtonColor: "#2bff00",
         cancelButtonColor: "#d33",
         confirmButtonText: "Sim, Remover!",
         cancelButtonText: "Cancelar",
-        background: "#2bff00",
+        background: "#2f2f2f",
         color: "#fff",
       });
       if (result.isConfirmed) {
@@ -710,11 +710,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             text: "Deseja Remover o Agrupamento Deste Lote?",
             icon: "question",
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
+            confirmButtonColor: "#2bff00",
             cancelButtonColor: "#d33",
             confirmButtonText: "Sim, Remover!",
             cancelButtonText: "Cancelar",
-            background: "#2bff00",
+            background: "#2f2f2f",
             color: "#fff",
           });
 
@@ -851,11 +851,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       text: "Tem certeza que deseja desativar o agrupamento e salvar os lotes?",
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
+      confirmButtonColor: "#2bff00",
       cancelButtonColor: "#d33",
       confirmButtonText: "Sim, Salvar!",
       cancelButtonText: "Cancelar",
-      background: "#2bff00",
+      background: "#2f2f2f",
       color: "#fff",
     });
     if (result.isConfirmed) {

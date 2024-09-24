@@ -316,7 +316,7 @@ button:hover {
   width: 50px;
   height: 50px;
   border: 5px solid rgba(0, 0, 0, 0.1);
-  border-top: 5px solid #3498db; /* Cor principal */
+  border-top: 5px solid #2bff00; /* Cor principal */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 20px auto;
