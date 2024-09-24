@@ -935,4 +935,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("Largura").value = "";
     document.getElementById("parcelas").value = "";
   }
+  $(document).ready(function() {
+    // Máscara para valor monetário (Valor do Lote)
+    
+    // Máscara para número de parcelas
+    $('#parcelas').mask('00000');
+    
+    // Máscara para comprimento e largura do lote
+    $('#Comprimento').mask('0000000.00');
+    $('#Largura').mask('0000000.00');
+    
+    // Conversão de vírgula para ponto decimal na submissão do formulário
+    $('#lote-form').on('submit', function(event) {
+      event.preventDefault(); // Prevenir o envio padrão do formulário
+
+      // Pegar os valores dos campos que precisam de conversão
+      let valor = $('#valor').val().replace(/\./g, '').replace(',', '.');
+      let comprimento = $('#Comprimento').val().replace(/\./g, '').replace(',', '.');
+      let largura = $('#Largura').val().replace(/\./g, '').replace(',', '.');
+
+      // Atualizar os valores convertidos nos campos (para envio correto)
+      $('#valor').val(valor);
+      $('#Comprimento').val(comprimento);
+      $('#Largura').val(largura);
+
+      // Submeter o formulário após a conversão
+      this.submit();
+    });
+  });
 });
