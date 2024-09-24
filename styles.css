@@ -157,7 +157,7 @@ h1 {
 }
 
 /* Modal */
-.modal, .overlay {
+.modal{
     display: none;
     position: fixed;
     z-index: 1;
@@ -267,18 +267,76 @@ button:hover {
     }
 }
 
-.content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 600px;
-    min-height: 500px;
-    position: relative;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
+ /* Overlay cobrindo toda a tela */
+ .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7); /* Transparência preta */
+    display: grid;
     justify-content: center;
     align-items: center;
-}
+    z-index: 9999; /* Fica no topo */
+  }
+
+  /* Conteúdo centralizado */
+  .content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.5s ease;
+  }
+
+  /* Animação de fade-in */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Estilo do spinner */
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-top: 5px solid #3498db; /* Cor principal */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  /* Animação do spinner */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Mensagem */
+  .statusMessage h5 {
+    font-size: 18px;
+    color: #333;
+  }
+
+  /* Ocultar por padrão */
+  .overlay, .content {
+    display: none;
+  }
+
+  /* Exibir quando necessário */
+  .overlay.show, .content.show {
+    display: flex;
+    flex-direction: column;
+  }
