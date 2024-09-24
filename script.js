@@ -75,7 +75,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     selectedLote = event.target;
     estilizarLoteSelecionado(selectedLote, true);
-    console.log(selectedLote);
   }
 
   function estilizarLoteSelecionado(lotediv, status) {
@@ -151,19 +150,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (loteData && loteElement.hasAttribute("data-agrupamento")) {
         loteElement.classList.add("agrupadoocupado");
-        console.log(loteData && loteElement.hasAttribute("data-agrupamento"));
       }
       if (loteData && !loteElement.hasAttribute("data-agrupamento")) {
         loteElement.classList.add("semagrupamentoocupado");
-        console.log(loteData && !loteElement.hasAttribute("data-agrupamento"));
       }
       if (!loteData && !loteElement.hasAttribute("data-agrupamento")) {
         loteElement.classList.add("semagrupamentolivre");
-        console.log(!loteData && !loteElement.hasAttribute("data-agrupamento"));
       }
       if (!loteData && loteElement.hasAttribute("data-agrupamento")) {
         loteElement.classList.add("agrupadolivre");
-        console.log(!loteData && loteElement.hasAttribute("data-agrupamento"));
       }
     }
   }
@@ -181,7 +176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (!fund) {
-      console.log("Nenhum agrupamento encontrado para o lote atual.");
+      toastr.warning("Nenhum agrupamento encontrado para o lote atual.");
     }
   }
   // Chama a função para checar o status dos lotes ao carregar a página
@@ -253,7 +248,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       for (const agrupamentoId of Object.keys(agrupamentos)) {
         const agrupamentoData = agrupamentos[agrupamentoId];
         if (agrupamentoData.lotes.includes(loteid)) {
-          console.log("deu certo");
           await Promise.all(
             agrupamentoData.lotes.map(async (id) => {
               await saveLoteDetails(id);
@@ -298,7 +292,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         paymentSection.classList.remove("hidden");
         updateLoteStatus(lote); // Atualiza os detalhes
       } catch (error) {
-        console.error("Erro ao salvar o lote:", error);
         toastr.error("Erro ao salvar os detalhes do lote.", "error");
       }
     } else {
@@ -311,67 +304,61 @@ document.addEventListener("DOMContentLoaded", async () => {
     const agrupamentosSnapshot = await get(agrupamentosRef);
 
     if (agrupamentosSnapshot.exists()) {
-        const agrupamentos = agrupamentosSnapshot.val();
+      const agrupamentos = agrupamentosSnapshot.val();
 
-        // Usando for...of para iterar sobre as chaves dos agrupamentos
-        for (const agrupamentoId of Object.keys(agrupamentos)) {
-            const agrupamentoData = agrupamentos[agrupamentoId];
-            console.log(agrupamentoData);
+      // Usando for...of para iterar sobre as chaves dos agrupamentos
+      for (const agrupamentoId of Object.keys(agrupamentos)) {
+        const agrupamentoData = agrupamentos[agrupamentoId];
 
-            if (agrupamentoData.lotes.includes(lote)) {
-                console.log(agrupamentoData.lotes.includes(lote));
-                const result = await Swal.fire({
-                    title: "Adicionar parcela?",
-                    text: "Deseja adicionar a parcela para este lote?",
-                    icon: "question",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Sim, adicionar!",
-                    cancelButtonText: "Cancelar",
-                    background: "#2f2f2f",
-                    color: "#fff",
-                });
-                console.log(result);
+        if (agrupamentoData.lotes.includes(lote)) {
+          const result = await Swal.fire({
+            title: "Adicionar parcela?",
+            text: "Deseja adicionar a parcela para este lote?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, adicionar!",
+            cancelButtonText: "Cancelar",
+            background: "#2f2f2f",
+            color: "#fff",
+          });
 
-                if (result.isConfirmed) {
-                    console.log("deu certo");
-                    try {
-                        console.log(agrupamentoData.lotes);
-                        await Promise.all(
-                            agrupamentoData.lotes.map(async (id) => {
-                                await addParcelasave(id);
-                                console.log(`add parcela ${id}`);
-                            })
-                        );
-                    } catch (error) {
-                        console.error(error);
-                    }
-                    return; // Certifique-se de sair da função após adicionar as parcelas
-                }
-            } else {
-                // Se o lote não estiver no agrupamento
-                const result = await Swal.fire({
-                    title: "Adicionar parcela?",
-                    text: "Deseja adicionar a parcela para este lote?",
-                    icon: "question",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Sim, adicionar!",
-                    cancelButtonText: "Cancelar",
-                    background: "#2f2f2f",
-                    color: "#fff",
-                });
-
-                if (result.isConfirmed) {
-                    await addParcelasave(lote);
-                    return; // Certifique-se de sair da função após adicionar a parcela
-                }
+          if (result.isConfirmed) {
+            try {
+              await Promise.all(
+                agrupamentoData.lotes.map(async (id) => {
+                  await addParcelasave(id);
+                })
+              );
+            } catch (error) {
+              toastr.error(error);
             }
+            return; // Certifique-se de sair da função após adicionar as parcelas
+          }
+        } else {
+          // Se o lote não estiver no agrupamento
+          const result = await Swal.fire({
+            title: "Adicionar parcela?",
+            text: "Deseja adicionar a parcela para este lote?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, adicionar!",
+            cancelButtonText: "Cancelar",
+            background: "#2f2f2f",
+            color: "#fff",
+          });
+
+          if (result.isConfirmed) {
+            await addParcelasave(lote);
+            return; // Certifique-se de sair da função após adicionar a parcela
+          }
         }
+      }
     }
-}
+  }
   // Função para adicionar um pagamento (parcela)
   async function addParcelasave(loteId) {
     const loteRef = ref(database, `lotes/${loteId}`);
@@ -381,9 +368,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       'input[name="paymentMethod"]:checked'
     );
     let gerarcomprovantecheck = false;
-    console.log(gerarcomprovantecheck);
+
     const parcelavalue = parcelaInput.value;
-    console.log(selectedPaymentMethod);
+
     // Cálculo do valor restante
     const valorRestante = calcularValorRestante(loteData);
     // Cálculo do valor restante
@@ -428,8 +415,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         toastr.success("Parcela adicionada com sucesso!");
         updateLoteStatus(loteId);
       } catch (error) {
-        console.error("Erro ao adicionar parcela:", error);
-        toastr.error("Erro ao adicionar a parcela.");
+        toastr.error("Erro ao adicionar a parcela.", error);
       }
     }
   }
@@ -516,7 +502,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Adiciona a imagem base64 ao PDF
       doc.addImage(base64Image, "JPEG", 10, 5, 40, 40);
-      console.log("Imagem adicionada ao PDF.");
 
       // Informações da empresa à direita
       doc.setFont("Helvetica", "bold");
@@ -639,6 +624,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  async function deleteagrupamento(lote) {
+    const agrupamentosRef = ref(database, "agrupamentos");
+    const agrupamentosSnapshot = await get(agrupamentosRef);
+
+    if (agrupamentosSnapshot.exists()) {
+      const agrupamentos = agrupamentosSnapshot.val();
+
+      // Usando for...of para iterar sobre as chaves dos agrupamentos
+      for (const agrupamentoId of Object.keys(agrupamentos)) {
+        const agrupamentoData = agrupamentos[agrupamentoId];
+
+        if (agrupamentoData.lotes.includes(lote)) {
+          const result = await Swal.fire({
+            title: "Remover Agrupamento?",
+            text: "Deseja Remover o Agrupamento Deste Lote?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, Remover!",
+            cancelButtonText: "Cancelar",
+            background: "#2f2f2f",
+            color: "#fff",
+          });
+
+          if (result.isConfirmed) {
+            try {
+              await Promise.all(
+                agrupamentoData.lotes.map(async (id) => {
+                  await deleteLote(id);
+
+                  const loteRef = ref(
+                    database,
+                    `agrupamentos/${agrupamentoId}`
+                  );
+
+                  await remove(loteRef);
+                })
+              );
+            } catch (error) {
+              toastr.error(error);
+            }
+            return; // Certifique-se de sair da função após adicionar as parcelas
+          }
+        } else {
+          toastr.error(`esse lote nao faz parte de um agrupamento `);
+        }
+      }
+    }
+  }
+
   // Eventos de clique nos lotes
   document.querySelectorAll(".lote").forEach((lote) => {
     lote.addEventListener("click", (e) => {
@@ -675,6 +711,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   deleteLoteButton.addEventListener("click", (e) => {
     e.preventDefault();
     deleteLote();
+    checkLotesStatus();
+  });
+
+  // Evento para deletar um lote
+  const deleteagrupamentoButton = document.getElementById("delete-agrupamento");
+  deleteagrupamentoButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    deleteagrupamento(loteAtual);
     checkLotesStatus();
   });
 
@@ -735,8 +779,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       lotesSelecionados.push(loteId);
       estilizarLoteSelecionado(lote, true);
     }
-
-    console.log("Lotes selecionados: ", lotesSelecionados);
   }
   async function confirmarDesativacaoAgrupamento() {
     const result = await Swal.fire({
@@ -761,8 +803,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const agrupamentoId = lotesSelecionados; // ID único para o agrupamento
       const agrupamentoData = { lotes: lotesSelecionados };
 
-      console.log("Salvando agrupamento:", agrupamentoData); // Verifica os dados a serem salvos
-
       // Referência ao banco de dados para salvar o agrupamento
       const agrupamentoRef = ref(database, `agrupamentos/${agrupamentoId}`);
 
@@ -776,8 +816,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           availabilityMessage.textContent = `Agrupamento ${agrupamentoId}`;
           lote.classList.remove("selecionado");
         });
-
-        console.log("Agrupamento salvo no Firebase:", agrupamentos);
       } catch (error) {
         console.error("Erro ao salvar agrupamento no Firebase:", error);
         toastr.error("Erro ao salvar agrupamento.", "Error");
@@ -794,7 +832,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const agrupamentosSnapshot = await get(agrupamentosRef);
       if (agrupamentosSnapshot.exists()) {
         const agrupamentos = agrupamentosSnapshot.val();
-        console.log(agrupamentos);
 
         // Limpa a mensagem antes de adicionar novas informações
         agrupamentomessage.textContent = "";
@@ -802,7 +839,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Para cada agrupamento, atribui o data-agrupamento aos lotes correspondentes
         Object.keys(agrupamentos).forEach((agrupamentoId) => {
           const agrupamentoData = agrupamentos[agrupamentoId];
-          console.log(agrupamentoData);
 
           // Atribui o agrupamentoId a cada lote no agrupamento
           agrupamentoData.lotes.forEach((loteId) => {
