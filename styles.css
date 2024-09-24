@@ -286,7 +286,8 @@ button:hover {
 
 /* Conteúdo centralizado */
 .check {
-  background-color: #fff;
+  background-color: #2f2f2f;
+  color: #fff;
   padding: 20px;
   border-radius: 10px;
   text-align: center;
