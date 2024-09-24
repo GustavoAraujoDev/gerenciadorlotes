@@ -136,6 +136,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Função para verificar o status de todos os lotes
   async function checkLotesStatus() {
+  // Elemento onde as mensagens serão exibidas
+  const overlay = document.getElementById('overlay');
+  const content = document.getElementById('content');
+
+  overlay.style.display = 'block'; // Exibe o indicador de loading
+  content.style.display = 'block'; // Exibe o indicador de loading
+
     for (let i = 1; i <= 48; i++) {
       // Referência ao lote no banco de dados
       const loteRef = ref(database, `lotes/${i}`);
@@ -161,6 +168,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         loteElement.classList.add("agrupadolivre");
       }
     }
+
+  overlay.style.display = 'none';
+  content.style.display = 'none';
   }
 
   function checkAgrupStatus(loteAtual) {
@@ -599,7 +609,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Função para deletar um lote
-  async function deleteLote() {
+  async function deleteLote(deleteid, isPartOfGrouping) {
+    // Se o lote faz parte de um agrupamento, deletar sem confirmação
+  if (isPartOfGrouping) {
+    try { 
+      const loteRef = ref(database, `lotes/${deleteid}`);
+      await remove(loteRef);
+      modal.style.display = "none";
+      availabilityMessage.textContent = "";
+      loteForm.classList.remove("hidden");
+      detailsSection.classList.add("hidden");
+      paymentSection.classList.add("hidden");
+      toastr.success("Lote removido com sucesso!");
+    } catch (error) {
+      toastr.error(`Erro ao remover lote ${deleteid}.`, error);
+      throw error;
+    }
+  }else{
     const result = await Swal.fire({
       title: "Remover Lotes?",
       text: "Deseja Remover este lote?",
@@ -613,7 +639,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       color: "#fff",
     });
     if (result.isConfirmed) {
-      const loteRef = ref(database, `lotes/${loteAtual}`);
+      const loteRef = ref(database, `lotes/${deleteid}`);
       await remove(loteRef);
       modal.style.display = "none";
       availabilityMessage.textContent = "";
@@ -622,6 +648,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       paymentSection.classList.add("hidden");
       toastr.success("Lote removido com sucesso!");
     }
+  }
   }
 
   async function deleteagrupamento(lote) {
@@ -653,16 +680,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             try {
               await Promise.all(
                 agrupamentoData.lotes.map(async (id) => {
-                  await deleteLote(id);
-
-                  const loteRef = ref(
-                    database,
-                    `agrupamentos/${agrupamentoId}`
-                  );
-
-                  await remove(loteRef);
+                  await deleteLote(id, true);
+                  console.log(`deltete lote ${id}`)
+                  console.log(deleteLote(id))
                 })
               );
+              const loteRef = ref(
+                database,
+                `agrupamentos/${agrupamentoId}`
+              );
+              await remove(loteRef);
+              console.log(`agrup delete ${agrupamentoId}`)
             } catch (error) {
               toastr.error(error);
             }
@@ -710,7 +738,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const deleteLoteButton = document.getElementById("delete-lote");
   deleteLoteButton.addEventListener("click", (e) => {
     e.preventDefault();
-    deleteLote();
+    deleteLote(loteAtual, false);
     checkLotesStatus();
   });
 
@@ -752,6 +780,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       lote.removeEventListener("click", selecionarLote);
     });
     salvarAgrupamento();
+    checkLotesStatus();
   }
 
   function selecionarLote(event) {
